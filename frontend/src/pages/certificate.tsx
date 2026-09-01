@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import AdminDashboard from '../admin/AdminDashboard';
@@ -103,6 +104,7 @@ Warm regards,
 ];
 
 const CertificateGenerator: React.FC = () => {
+  const navigate = useNavigate();
   const Watermark = () => {
     return (
       <>
@@ -1043,6 +1045,16 @@ const CertificateGenerator: React.FC = () => {
                 className="rounded-lg bg-blue-900 px-6 py-2 text-sm font-bold text-white hover:bg-blue-800 transition-colors shadow-lg"
               >
                 📄 DOWNLOAD SELECTED PDF
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('authToken');
+                  localStorage.removeItem('authUser');
+                  navigate('/login');
+                }}
+                className="mt-3 w-full rounded-lg border border-slate-300 px-6 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                Logout
               </button>
             </div>
           </div>
