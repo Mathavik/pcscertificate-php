@@ -25,6 +25,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isMonthOpen, setIsMonthOpen] = useState(false);
   const [isYearOpen, setIsYearOpen] = useState(false);
 
+  const formatDateForDisplay = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+    return dateStr;
+  };
+
   const parseCertDate = (raw: string): { day: string; month: string; year: string } | null => {
     if (!raw) return null;
     // Support DD.MM.YYYY
@@ -262,9 +271,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <td className="px-3 py-2">{c.studentName}</td>
                   <td className="px-3 py-2">{c.collegeName}</td>
                   <td className="px-3 py-2">{c.certificateTitle}</td>
-                  <td className="px-3 py-2">{c.fromDate}</td>
-                  <td className="px-3 py-2">{c.toDate}</td>
-                  <td className="px-3 py-2 font-medium text-slate-600">{c.date}</td>
+                  <td className="px-3 py-2">{formatDateForDisplay(c.fromDate)}</td>
+                  <td className="px-3 py-2">{formatDateForDisplay(c.toDate)}</td>
+                  <td className="px-3 py-2 font-medium text-slate-600">{formatDateForDisplay(c.date)}</td>
                   <td className="px-3 py-2">
                     {/* 3. Replaced onClick with handleLoadClick */}
                     <button 

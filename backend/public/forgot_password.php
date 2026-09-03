@@ -51,7 +51,7 @@ try {
     $expiresAt = date('Y-m-d H:i:s', time() + (60 * 30)); // 30 minutes
     $userModel->createPasswordReset($email, $token, $expiresAt);
 
-    $frontendUrl = $_ENV['FRONTEND_URL'] ?? 'http://192.168.1.8:3000';
+    $frontendUrl = $_ENV['FRONTEND_URL'] ?? 'http://192.168.1.7:3002';
     $resetLink = "{$frontendUrl}/reset-password?token={$token}&email=" . urlencode($email);
 
     // Send reset link email via SMTP

@@ -24,7 +24,7 @@ function generateCertificateSerialNumber($pdo)
 function generateCertificateQRCode($serialNumber)
 {
     $dotenv = parse_ini_file(__DIR__ . '/../.env');
-    $frontendUrl = $dotenv['FRONTEND_URL'] ?? 'http://192.168.1.8:3000';
+    $frontendUrl = $dotenv['FRONTEND_URL'] ?? 'http://192.168.1.7:3002';
     $verifyUrl = "{$frontendUrl}/verify/{$serialNumber}";
 
     try {

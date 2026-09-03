@@ -40,12 +40,21 @@ export type SavedCertificate = CertificateFields & {
   qrCode?: string;
 };
 
+const formatDateForDisplay = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  }
+  return dateStr;
+};
+
 const defaultFields: CertificateFields = {
   studentName: "Ms SRIJANNADEVI V M",
   collegeName: "Rani Anna Government College for Women, Tirunelveli",
-  fromDate: "12th December 2025",
-  toDate: "30th March 2026",
-  date: '30.03.2026',
+  fromDate: "2025-12-12",
+  toDate: "2026-03-30",
+  date: '2026-03-30',
   certificateTitle: 'ATTENDANCE CERTIFICATE',
   projectTitle: 'ENTERPRISE WORKFLOW AUTOMATION SYSTEM',
   certificateContent: 'This is to certify that {{student Name}} final year M.Sc Computer Science student of {{college Name}} has successfully attended the internship on "{{project Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. During this period, the student was present and actively participated in all the scheduled sessions. The student has demonstrated consistent attendance and engagement throughout the period.',
@@ -127,7 +136,7 @@ const CertificateGenerator: React.FC = () => {
       </>
     );
   };
-  const API_BASE = "http://192.168.1.8/pcsCertificate/backend/public";
+  const API_BASE = "http://192.168.1.7/pcsCertificate/backend/public";
   const [qrCodes, setQrCodes] = useState<string[]>(['', '', '']);
   const [serialNumbers, setSerialNumbers] = useState<string[]>(['', '', '']);
 
@@ -169,8 +178,8 @@ const CertificateGenerator: React.FC = () => {
     parsed = parsed
       .replace(/{{student Name}}/g, `<strong>${page.studentName}</strong>`)
       .replace(/{{college Name}}/g, isAcceptance ? `${page.collegeName}` : `<strong>${page.collegeName}</strong>`)
-      .replace(/{{from Date}}/g, isAcceptance ? `${page.fromDate}` : `<strong>${page.fromDate}</strong>`)
-      .replace(/{{to Date}}/g, isAcceptance ? `${page.toDate}` : `<strong>${page.toDate}</strong>`)
+      .replace(/{{from Date}}/g, isAcceptance ? `${formatDateForDisplay(page.fromDate)}` : `<strong>${formatDateForDisplay(page.fromDate)}</strong>`)
+      .replace(/{{to Date}}/g, isAcceptance ? `${formatDateForDisplay(page.toDate)}` : `<strong>${formatDateForDisplay(page.toDate)}</strong>`)
       .replace(/{{project Title}}/g, `<strong>${page.projectTitle}</strong>`)
       .replace(/{{internship Title}}/g, `<strong>${page.internshipTitle}</strong>`)
       .replace(/{{internship Completion Title}}/g, `<strong>${page.internshipCompletionTitle}</strong>`)
@@ -262,7 +271,7 @@ const CertificateGenerator: React.FC = () => {
       // Clear the loaded snapshot so the next save behaves as Create
       loadedSnapshot.current[index] = null;
 
-      // ✅ ALWAYS clear student name
+      // ✅ ALWAYS clear student name input (review keeps showing it)
       setPagesData((prev) => {
         const newData = [...prev];
         newData[index] = { ...newData[index], studentName: "" };
@@ -289,6 +298,7 @@ const CertificateGenerator: React.FC = () => {
       setCurrentCertificateIds([undefined, undefined, undefined]);
       setSelectedPages([0, 1, 2]);
       loadedSnapshot.current = [null, null, null];
+      setReviewName([defaultFields.studentName, defaultFields.studentName, defaultFields.studentName]);
     }
 
     // Map certificate type to editor page index
@@ -329,6 +339,11 @@ const CertificateGenerator: React.FC = () => {
     setPagesData((current) => {
       const copy = [...current];
       copy[pageIndex] = { ...loadedFields };
+      return copy;
+    });
+    setReviewName((prev) => {
+      const copy = [...prev];
+      copy[pageIndex] = c.studentName || "";
       return copy;
     });
     setCurrentCertificateIds((prev) => {
@@ -494,6 +509,7 @@ const CertificateGenerator: React.FC = () => {
         <div>
           <label className="block text-[10px] font-bold uppercase">Date</label>
           <input
+            type="date"
             value={page.date}
             onChange={(e) => handleChange(index, 'date', e.target.value)}
             className="mt-1 w-full border px-3 py-2 text-sm rounded"
@@ -552,6 +568,7 @@ const CertificateGenerator: React.FC = () => {
             <div>
               <label className="block text-[10px] font-bold uppercase">From Date</label>
               <input
+                type="date"
                 value={page.fromDate}
                 onChange={(e) => handleChange(index, 'fromDate', e.target.value)}
                 className="mt-1 w-full border px-3 py-2 text-sm rounded"
@@ -561,6 +578,7 @@ const CertificateGenerator: React.FC = () => {
             <div>
               <label className="block text-[10px] font-bold uppercase">To Date</label>
               <input
+                type="date"
                 value={page.toDate}
                 onChange={(e) => handleChange(index, 'toDate', e.target.value)}
                 className="mt-1 w-full border px-3 py-2 text-sm rounded"
@@ -817,7 +835,7 @@ const CertificateGenerator: React.FC = () => {
                   </div>
                 )}
                 <div className="text-right text-[16px] font-bold text-black mb-6">
-                  {pagesData[0].date}
+                  {formatDateForDisplay(pagesData[0].date)}
                 </div>
                 <div className="text-center mb-2">
                   <h2 className="text-[20px] font-bold border-b-2 border-black inline-block pb-2 mb-2 uppercase tracking-tight">
@@ -908,7 +926,7 @@ const CertificateGenerator: React.FC = () => {
                   </div>
                 )}
                 <div className="text-right text-[16px] font-bold text-black mb-6">
-                  {pagesData[1].date}
+                  {formatDateForDisplay(pagesData[1].date)}
                 </div>
                 <div className="text-center mb-2">
                   <h2 className="text-[20px] font-bold border-b-2 border-black inline-block pb-2 mb-2 uppercase tracking-tight">
@@ -988,7 +1006,7 @@ const CertificateGenerator: React.FC = () => {
                   </div>
                 )}
                 <div className="text-right text-[16px] font-bold text-black mb-6">
-                  {pagesData[2].date}
+                  {formatDateForDisplay(pagesData[2].date)}
                 </div>
                 <div className="text-center mb-2">
                   <h2 className="text-[20px] font-bold border-b-2 border-black inline-block pb-2 mb-2 uppercase tracking-tight">

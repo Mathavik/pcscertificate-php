@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 // ✅ Correct API base – points to your PHP public folder
-const API = "http://192.168.1.8/pcsCertificate/backend/public";
+const API = "http://192.168.1.7/pcsCertificate/backend/public";
 
 interface CertificateData {
     serialNumber: string;

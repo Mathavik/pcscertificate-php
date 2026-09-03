@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 // ✅ Correct API base – points to your PHP public folder
-const API = "http://192.168.1.8/pcsCertificate/backend/public";
+const API = "http://192.168.1.7/pcsCertificate/backend/public";
 
 interface CertificateData {
     serialNumber: string;
@@ -197,7 +197,7 @@ export default function VerifyCertificate() {
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {certificate.fromDate}
+                                    {certificate.fromDate.split('-').length === 3 ? certificate.fromDate.split('-').reverse().join('.') : certificate.fromDate}
                                 </p>
                             </div>
 
@@ -209,7 +209,7 @@ export default function VerifyCertificate() {
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {certificate.toDate}
+                                    {certificate.toDate.split('-').length === 3 ? certificate.toDate.split('-').reverse().join('.') : certificate.toDate}
                                 </p>
                             </div>
                         </div>

@@ -22,4 +22,4 @@ define('DB_PORT', $_ENV['DB_PORT'] ?? 3306);
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'certificate');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASSWORD', $_ENV['DB_PASSWORD'] ?? '');
-define('FRONTEND_URL', $_ENV['FRONTEND_URL'] ?? 'http://192.168.1.8:3000');
+define('FRONTEND_URL', $_ENV['FRONTEND_URL'] ?? 'http://192.168.1.7:3002');
