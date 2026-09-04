@@ -52,19 +52,25 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="px-8 pt-10 pb-8">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black text-golden mb-4" style={{ color: '#DCCA87' }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <h1 className="text-3xl font-semibold text-gray-900" style={{ fontFamily: "var(--font-base)" }}>
-                Welcome Back
-              </h1>
-              <p className="text-gray-500 mt-1">Sign in to your account</p>
-            </div>
+          
+<div className="text-center mb-8">
+  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black mb-4">
+    <img
+      src="/android-chrome-192x192.png"
+      alt="Logo"
+      className="w-10 h-10 object-contain"
+    />
+  </div>
+
+  <h1
+    className="text-3xl font-semibold text-gray-900"
+    style={{ fontFamily: "var(--font-base)" }}
+  >
+    Welcome Back
+  </h1>
+
+  <p className="text-gray-500 mt-1">Sign in to your account</p>
+</div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
