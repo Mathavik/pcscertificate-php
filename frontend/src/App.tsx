@@ -7,8 +7,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import AdminLayout from "./admin/AdminLayout";
+import DashboardOverview from "./admin/DashboardOverview";
+import CollegeCertificates from "./admin/CollegeCertificates";
 
-// பக்கத்தின் மேல் பகுதிக்கு ஸ்க்ரோல் செய்யும் காம்பொனென்ட்
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -19,7 +21,6 @@ function ScrollToTop() {
   return null;
 }
 
-// Protected route wrapper – user must be logged in
 function RequireAuth({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem("authToken");
   if (!token) {
@@ -28,32 +29,50 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function RequireAdmin({ children }: { children: JSX.Element }) {
+  const token = localStorage.getItem("authToken");
+  const user = JSON.parse(localStorage.getItem("authUser") || "{}");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user.role?.toLowerCase() !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
-      {/* ScrollToTop காம்பொனென்ட்டை BrowserRouter-க்குள் சேர்த்துள்ளோம் */}
       <ScrollToTop />
       <Toaster position="top-right" />
 
-      {/* Page Routes */}
       <Routes>
-        <Route
+        {/* <Route
           path="/"
           element={
             <RequireAuth>
               <CertificateGenerator />
             </RequireAuth>
           }
-        />
+        /> */}
         <Route path="/verify/:serialNumber" element={<VerifyCertificate />} />
+
+        {/* Admin Routes with Sidebar */}
         <Route
           path="/admin"
           element={
-            <RequireAuth>
-              <CertificateGenerator />
-            </RequireAuth>
+            <RequireAdmin>
+              <AdminLayout />
+            </RequireAdmin>
           }
-        />
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardOverview />} />
+          <Route path="editor" element={<CertificateGenerator />} />
+          <Route path="colleges" element={<CollegeCertificates />} />
+        </Route>
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

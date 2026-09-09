@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { SavedCertificate } from '../pages/certificate';
-// 1. Import toast and Toaster
 import toast, { Toaster } from 'react-hot-toast';
 
-type AdminDashboardProps = {
+type CertificateManagerProps = {
   certificateStats: Array<{ certificateTitle: string; count: number }>;
   adminCertificates: SavedCertificate[];
   saveStatus: string;
@@ -11,7 +10,7 @@ type AdminDashboardProps = {
   onLoadIntoEditor: (c: SavedCertificate) => void;
 };
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({
+const CertificateManager: React.FC<CertificateManagerProps> = ({
   certificateStats,
   adminCertificates,
   saveStatus,
@@ -49,10 +48,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return null;
   };
 
-  // Load button click handler with Toast
   const handleLoadClick = (certificate: SavedCertificate) => {
     onLoadIntoEditor(certificate);
-    // Student பெயர் அல்லது ID-ஐ வைத்து Toast message-ஐக் காண்பிக்கிறோம்
     toast.success(`${certificate.studentName || 'Certificate'} loaded successfully!`, {
       duration: 3000,
       position: 'top-right',
@@ -106,12 +103,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
-      {/* 2. Add Toaster Component at the root level of your return JSX */}
       <Toaster />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-bold">Admin Dashboard</h2>
+          <h2 className="text-lg font-bold">Certificate Manager</h2>
           <p className="text-sm text-slate-600">Load saved certificates and review stored entries.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -275,7 +271,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <td className="px-3 py-2">{formatDateForDisplay(c.toDate)}</td>
                   <td className="px-3 py-2 font-medium text-slate-600">{formatDateForDisplay(c.date)}</td>
                   <td className="px-3 py-2">
-                    {/* 3. Replaced onClick with handleLoadClick */}
                     <button 
                       onClick={() => handleLoadClick(c)} 
                       className="text-xs bg-emerald-600 hover:bg-emerald-700 transition-colors text-white px-2 py-1 rounded"
@@ -293,4 +288,4 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   );
 };
 
-export default AdminDashboard;
+export default CertificateManager;
