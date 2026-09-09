@@ -57,7 +57,7 @@ const defaultFields: CertificateFields = {
   date: '2026-03-30',
   certificateTitle: 'ATTENDANCE CERTIFICATE',
   projectTitle: 'ENTERPRISE WORKFLOW AUTOMATION SYSTEM',
-  certificateContent: 'This is to certify that {{student Name}} final year M.Sc Computer Science student of {{college Name}} has successfully attended the internship on "{{project Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. During this period, the student was present and actively participated in all the scheduled sessions. The student has demonstrated consistent attendance and engagement throughout the period.',
+  certificateContent: 'This is to certify that {{student Name}} final year {{department}} student of {{college Name}} has successfully attended the internship on "{{project Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. During this period, the student was present and actively participated in all the scheduled sessions. The student has demonstrated consistent attendance and engagement throughout the period.',
   signatoryTitle: 'For PCS Software Solutions',
   attendanceTotalDays: '84 (exclude Sundays and other government holidays)',
   attendanceDaysAttended: '73',
@@ -67,7 +67,7 @@ const defaultFields: CertificateFields = {
   internshipTitle: "Internship cum College Project",
   internshipCompletionTitle: "Internship Completion Certificate",
   position: "Intern – Project Trainee",
-  department: "Business Analyst",
+  department: "Web Development",
   reportingManager: "Surya G, Training Head",
   location: "Surandai-Tenkasi, Tamil Nadu",
   hideReportingManager: false,
@@ -84,7 +84,7 @@ const defaultPages: CertificateFields[] = [
   {
     ...defaultFields,
     certificateTitle: 'INTERNSHIP COMPLETION CERTIFICATE',
-    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in M.Sc Computer Science, has successfully completed the internship on "{{project Title}}" under the guidance of PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be good.`,
+    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the internship on "{{project Title}}" under the guidance of PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be good.`,
     wishMessage: "We wish the student all the best in all future endeavours."
   },
   {
@@ -586,6 +586,17 @@ const CertificateGenerator: React.FC = () => {
             </div>
           </div>
 
+          {(page.certificateTitle.includes('ATTENDANCE') || page.certificateTitle.includes('INTERNSHIP')) && (
+            <div>
+              <label className="block text-[10px] font-bold uppercase">Department</label>
+              <input
+                value={page.department}
+                onChange={(e) => handleChange(index, 'department', e.target.value)}
+                className="mt-1 w-full border px-3 py-2 text-sm rounded"
+              />
+            </div>
+          )}
+
           {page.certificateTitle.includes('ACCEPTANCE') && (
             <>
               <div>
@@ -615,27 +626,6 @@ const CertificateGenerator: React.FC = () => {
                   onChange={(e) => handleChange(index, 'position', e.target.value)}
                   className="mt-1 w-full border px-3 py-2 text-sm rounded"
                   disabled={page.hidePosition}
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <label className="block text-[10px] font-bold uppercase">Department</label>
-                  <label className="flex items-center gap-1 text-[9px]">
-                    <input
-                      type="checkbox"
-                      checked={page.hideDepartment}
-                      onChange={(e) => handleChange(index, 'hideDepartment', e.target.checked)}
-                      className="w-3 h-3"
-                    />
-                    Hide
-                  </label>
-                </div>
-                <input
-                  value={page.department}
-                  onChange={(e) => handleChange(index, 'department', e.target.value)}
-                  className="mt-1 w-full border px-3 py-2 text-sm rounded"
-                  disabled={page.hideDepartment}
                 />
               </div>
 

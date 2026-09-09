@@ -21,7 +21,7 @@ if (!$collegeName) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, studentName, collegeName, certificateTitle, internshipTitle, fromDate, toDate, date, serialNumber FROM certificates WHERE collegeName = :collegeName ORDER BY studentName ASC");
+    $stmt = $pdo->prepare("SELECT id, studentName, collegeName, certificateTitle, internshipTitle, department, fromDate, toDate, date, serialNumber FROM certificates WHERE collegeName = :collegeName ORDER BY studentName ASC");
     $stmt->execute([':collegeName' => $collegeName]);
     $certificates = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($certificates);

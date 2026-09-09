@@ -11,6 +11,7 @@ type CollegeCertificate = {
   collegeName: string;
   certificateTitle: string;
   internshipTitle: string;
+  department: string;
   fromDate: string;
   toDate: string;
   date: string;
@@ -28,8 +29,10 @@ const CollegeCertificates: React.FC = () => {
   const [previewCertId, setPreviewCertId] = useState<number | null>(null);
   const [selectedCertTitle, setSelectedCertTitle] = useState<string>('');
   const [selectedInternshipTitle, setSelectedInternshipTitle] = useState<string>('');
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [isCertTitleOpen, setIsCertTitleOpen] = useState(false);
   const [isInternshipTitleOpen, setIsInternshipTitleOpen] = useState(false);
+  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
 
   useEffect(() => {
     fetchColleges();
@@ -68,6 +71,7 @@ const CollegeCertificates: React.FC = () => {
     setIsDropdownOpen(false);
     setSelectedCertTitle('');
     setSelectedInternshipTitle('');
+    setSelectedDepartment('');
     if (college) {
       fetchCertificates(college);
     } else {
@@ -94,10 +98,15 @@ const CollegeCertificates: React.FC = () => {
     new Set(certificates.map((c) => c.internshipTitle).filter(Boolean))
   ).sort();
 
+  const departments = Array.from(
+    new Set(certificates.map((c) => c.department).filter(Boolean))
+  ).sort();
+
   const filteredCertificates = certificates.filter((c) => {
     const matchesCertTitle = selectedCertTitle ? c.certificateTitle === selectedCertTitle : true;
     const matchesInternshipTitle = selectedInternshipTitle ? (c.internshipTitle || '') === selectedInternshipTitle : true;
-    return matchesCertTitle && matchesInternshipTitle;
+    const matchesDepartment = selectedDepartment ? (c.department || '') === selectedDepartment : true;
+    return matchesCertTitle && matchesInternshipTitle && matchesDepartment;
   });
 
   const distinctStudentCountForInternship = (title: string) =>
@@ -110,6 +119,7 @@ const CollegeCertificates: React.FC = () => {
   const clearFilters = () => {
     setSelectedCertTitle('');
     setSelectedInternshipTitle('');
+    setSelectedDepartment('');
   };
 
   return (
@@ -195,7 +205,7 @@ const CollegeCertificates: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => { setIsCertTitleOpen(!isCertTitleOpen); setIsInternshipTitleOpen(false); }}
+                onClick={() => { setIsCertTitleOpen(!isCertTitleOpen); setIsInternshipTitleOpen(false); setIsDepartmentOpen(false); }}
                 className="flex items-center justify-between w-60 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
               >
                 <span className="truncate">{selectedCertTitle || '-- All Certificates --'}</span>
@@ -244,7 +254,7 @@ const CollegeCertificates: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => { setIsInternshipTitleOpen(!isInternshipTitleOpen); setIsCertTitleOpen(false); }}
+                onClick={() => { setIsInternshipTitleOpen(!isInternshipTitleOpen); setIsCertTitleOpen(false); setIsDepartmentOpen(false); }}
                 className="flex items-center justify-between w-72 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
               >
                 <span className="truncate">{selectedInternshipTitle || '-- All Internship Titles --'}</span>
@@ -285,7 +295,56 @@ const CollegeCertificates: React.FC = () => {
             )}
           </div>
 
-          {(selectedCertTitle || selectedInternshipTitle) && (
+          {/* Department Filter */}
+          <div className="flex flex-col gap-1 relative">
+            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+              Filter Department
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setIsDepartmentOpen(!isDepartmentOpen); setIsCertTitleOpen(false); setIsInternshipTitleOpen(false); }}
+                className="flex items-center justify-between w-56 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
+              >
+                <span className="truncate">{selectedDepartment || '-- All Departments --'}</span>
+                <svg className={`w-4 h-4 text-slate-400 transition-transform ${isDepartmentOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {selectedDepartment && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg px-3 py-1 flex flex-col items-center">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Count</span>
+                  <span className="text-lg font-bold text-purple-700 leading-none">
+                    {certificates.filter((c) => (c.department || '') === selectedDepartment).length}
+                  </span>
+                </div>
+              )}
+            </div>
+            {isDepartmentOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsDepartmentOpen(false)} />
+                <div className="absolute top-full left-0 mt-1 w-56 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl z-20 py-1">
+                  <button
+                    onClick={() => { setSelectedDepartment(''); setIsDepartmentOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${selectedDepartment === '' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                  >
+                    -- All Departments --
+                  </button>
+                  {departments.map((dept) => (
+                    <button
+                      key={dept}
+                      onClick={() => { setSelectedDepartment(dept); setIsDepartmentOpen(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${selectedDepartment === dept ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                    >
+                      {dept}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {(selectedCertTitle || selectedInternshipTitle || selectedDepartment) && (
             <button
               onClick={clearFilters}
               className="mt-5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold px-3 py-2 transition-all"
