@@ -39,7 +39,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       toast.success(`Welcome back, ${data.user.name}!`);
       onLogin?.(data.user);
-      navigate(data.user.role === 'admin' ? '/admin/dashboard' : '/');
+      navigate('/');
     } catch (err: any) {
       toast.error(err.message || 'Unable to login. Please try again.');
     } finally {

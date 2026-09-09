@@ -94,7 +94,7 @@ const DashboardOverview: React.FC = () => {
       {/* Quick Action */}
       <div className="mb-8">
         <button
-          onClick={() => navigate('/admin/editor')}
+          onClick={() => navigate('/certificates/attendance')}
           className="bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors"
         >
           + Create New Certificate
