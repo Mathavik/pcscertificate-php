@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useRef, useState, ReactNode } from 'react';
 import toast from 'react-hot-toast';
 import { authHeaders } from '../auth';
+import { API_BASE } from '../config';
 
 export type CertificateFields = {
   studentName: string;
@@ -108,8 +109,6 @@ Warm regards,
 **FOR PCS SOFTWARE SOLUTIONS**`
   }
 ];
-
-const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
 
 type CertificateContextValue = {
   pagesData: CertificateFields[];

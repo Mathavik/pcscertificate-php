@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authHeaders } from '../auth';
-
-const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
+import { API_BASE } from '../config';
 
 type CertificateStat = {
   certificateTitle: string;

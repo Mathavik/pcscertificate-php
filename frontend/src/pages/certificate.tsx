@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import CertificateManager from '../admin/CertificateManager';
 import toast, { Toaster } from 'react-hot-toast';
+import { API_BASE } from '../config';
 
 export type CertificateFields = {
   studentName: string;
@@ -136,7 +137,6 @@ const CertificateGenerator: React.FC = () => {
       </>
     );
   };
-  const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
   const [qrCodes, setQrCodes] = useState<string[]>(['', '', '']);
   const [serialNumbers, setSerialNumbers] = useState<string[]>(['', '', '']);
 
