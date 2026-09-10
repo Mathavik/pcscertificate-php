@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { authHeaders } from '../auth';
 
 const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
 
@@ -31,8 +32,8 @@ const DashboardOverview: React.FC = () => {
   const fetchData = async () => {
     try {
       const [statsRes, listRes] = await Promise.all([
-        fetch(`${API_BASE}/stats.php`),
-        fetch(`${API_BASE}/list.php`),
+        fetch(`${API_BASE}/stats.php`, { headers: authHeaders() }),
+        fetch(`${API_BASE}/list.php`, { headers: authHeaders() }),
       ]);
 
       if (statsRes.ok) {

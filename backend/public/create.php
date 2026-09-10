@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Certificate.php';
 require_once __DIR__ . '/../helpers/helpers.php';
+require_once __DIR__ . '/../helpers/auth.php';
+
+$authUser = require_admin_auth();
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);

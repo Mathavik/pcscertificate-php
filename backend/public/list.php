@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Certificate.php';
+require_once __DIR__ . '/../helpers/auth.php';
+
+$authUser = require_admin_auth();
 
 $pdo = $GLOBALS['pdo'];
 $certModel = new Certificate($pdo);

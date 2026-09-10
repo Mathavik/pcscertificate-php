@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { API_BASE } from '../config';
+import { setAuthSession } from '../auth';
 
 type LoginProps = {
   onLogin?: (user: { id: number; name: string; email: string; role: string }) => void;
@@ -34,8 +35,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         throw new Error(data.message || 'Login failed');
       }
 
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('authUser', JSON.stringify(data.user));
+      setAuthSession(data.token, data.user);
 
       toast.success(`Welcome back, ${data.user.name}!`);
       onLogin?.(data.user);

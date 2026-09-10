@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useRef, useState, ReactNode } from 'react';
 import toast from 'react-hot-toast';
+import { authHeaders } from '../auth';
 
 export type CertificateFields = {
   studentName: string;
@@ -205,7 +206,7 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
       setSaveStatus(isEdit ? "Updating..." : "Saving...");
       const res = await fetch(endpoint, {
         method: isEdit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Save failed");
@@ -351,8 +352,8 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
   const loadAdminCertificates = async () => {
     try {
       const [certRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/list.php`),
-        fetch(`${API_BASE}/stats.php`),
+        fetch(`${API_BASE}/list.php`, { headers: authHeaders() }),
+        fetch(`${API_BASE}/stats.php`, { headers: authHeaders() }),
       ]);
       if (!certRes.ok || !statsRes.ok) throw new Error("Load failed");
       const certData = await certRes.json();

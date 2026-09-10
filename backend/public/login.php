@@ -55,7 +55,7 @@ $secretKey = $dotenvLogin['AUTH_SECRET'] ?? 'pcsCertificate-secret-key';
 $payload = json_encode([
     'user_id' => $user['id'],
     'email'   => $user['email'],
-    'exp'     => time() + (7 * 24 * 60 * 60), // 7 days
+    'exp'     => time() + (24 * 60 * 60), // 1 day
 ]);
 $token = base64_encode($payload) . '.' . hash_hmac('sha256', $payload, $secretKey);
 

@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { CertificateProvider } from './CertificateContext';
+import {
+  SESSION_TIMEOUT_MS,
+  clearAuthSession,
+  getAuthUser,
+  isAuthSessionExpired,
+  touchAuthSession,
+} from '../auth';
 
 const menuItems = [
   {
@@ -65,12 +72,42 @@ const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
+    clearAuthSession();
     navigate('/login');
   };
 
-  const authUser = JSON.parse(localStorage.getItem('authUser') || '{}');
+  const authUser = getAuthUser();
+
+  useEffect(() => {
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    const handleActivity = () => touchAuthSession();
+    events.forEach((ev) => window.addEventListener(ev, handleActivity, { passive: true }));
+
+    let lastTick = Date.now();
+    const forceLogout = () => {
+      clearAuthSession();
+      navigate('/login', { replace: true });
+    };
+    const checkSession = () => {
+      const now = Date.now();
+      const gap = now - lastTick;
+      lastTick = now;
+      if (gap >= SESSION_TIMEOUT_MS || isAuthSessionExpired()) {
+        forceLogout();
+      }
+    };
+    const interval = setInterval(checkSession, 30000);
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') checkSession();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, handleActivity));
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [navigate]);
 
   return (
     <div className="flex h-screen bg-slate-100">

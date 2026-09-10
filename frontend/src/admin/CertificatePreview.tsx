@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { authHeaders } from '../auth';
 
 const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
 
@@ -55,7 +56,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ certificateId, 
 
   const fetchCertificate = async () => {
     try {
-      const res = await fetch(`${API_BASE}/list.php`);
+      const res = await fetch(`${API_BASE}/list.php`, { headers: authHeaders() });
       if (!res.ok) throw new Error('Failed to load');
       const allCerts = await res.json();
       const found = allCerts.find((c: CertificateData) => c.id === certificateId);

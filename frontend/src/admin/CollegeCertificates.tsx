@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import CertificatePreview from './CertificatePreview';
+import { authHeaders } from '../auth';
 
 const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
 
@@ -38,7 +39,7 @@ const CollegeCertificates: React.FC = () => {
 
   const fetchColleges = async () => {
     try {
-      const res = await fetch(`${API_BASE}/colleges.php`);
+      const res = await fetch(`${API_BASE}/colleges.php`, { headers: authHeaders() });
       if (!res.ok) throw new Error('Failed to load colleges');
       const data = await res.json();
       setColleges(data);
@@ -52,7 +53,7 @@ const CollegeCertificates: React.FC = () => {
   const fetchCertificates = async (college: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/college_certificates.php?collegeName=${encodeURIComponent(college)}`);
+      const res = await fetch(`${API_BASE}/college_certificates.php?collegeName=${encodeURIComponent(college)}`, { headers: authHeaders() });
       if (!res.ok) throw new Error('Failed to load certificates');
       const data = await res.json();
       setCertificates(data);

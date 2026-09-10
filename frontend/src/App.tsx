@@ -13,6 +13,7 @@ import AttendanceCertificate from "./admin/AttendanceCertificate";
 import InternshipCertificate from "./admin/InternshipCertificate";
 import AcceptanceCertificate from "./admin/AcceptanceCertificate";
 import CertificateManagerPage from "./admin/CertificateManagerPage";
+import { clearAuthSession, getAuthToken, getAuthUser, isAuthSessionExpired } from "./auth";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -25,9 +26,10 @@ function ScrollToTop() {
 }
 
 function RequireAdmin({ children }: { children: JSX.Element }) {
-  const token = localStorage.getItem("authToken");
-  const user = JSON.parse(localStorage.getItem("authUser") || "{}");
-  if (!token) {
+  const token = getAuthToken();
+  const user = getAuthUser();
+  if (!token || isAuthSessionExpired()) {
+    clearAuthSession();
     return <Navigate to="/login" replace />;
   }
   if (user.role?.toLowerCase() !== "admin") {
