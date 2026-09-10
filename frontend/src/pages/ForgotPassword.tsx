@@ -81,19 +81,6 @@ const ForgotPassword: React.FC = () => {
               </button>
             </form>
 
-            {devLink && (
-              <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-sm font-medium text-amber-800 mb-2">Local test reset link:</p>
-                <p className="text-xs text-amber-700 break-all">{devLink}</p>
-                <a
-                  href={devLink}
-                  className="inline-block mt-2 text-xs font-semibold text-amber-800 underline"
-                >
-                  Open reset page →
-                </a>
-              </div>
-            )}
-
             <p className="text-center text-gray-600 mt-6">
               Remember your password?{' '}
               <Link to="/login" className="font-semibold text-black underline underline-offset-2">

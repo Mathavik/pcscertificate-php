@@ -54,7 +54,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="px-8 pt-10 pb-8">
           
 <div className="text-center mb-8">
-  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black mb-4">
+  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
     <img
       src="/android-chrome-192x192.png"
       alt="Logo"
@@ -145,13 +145,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
-
-            <p className="text-center text-gray-600 mt-6">
-              Don't have an account?{' '}
-              <Link to="/register" className="font-semibold text-black underline underline-offset-2">
-                Create Account
-              </Link>
-            </p>
           </div>
         </div>
 

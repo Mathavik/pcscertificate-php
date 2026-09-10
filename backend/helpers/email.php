@@ -103,8 +103,8 @@ function sendPasswordResetEmail($toEmail, $toName, $resetLink)
             <p style="text-align:center;margin:28px 0">
               <a href="{$resetLink}" style="background:#DCCA87;color:#000;text-decoration:none;padding:13px 28px;border-radius:8px;font-weight:bold">Reset Password</a>
             </p>
-            <p style="color:#666;font-size:13px;line-height:1.6">Or copy this link:<br><a href="{$resetLink}" style="color:#2563eb;word-break:break-all">{$resetLink}</a></p>
-            <p style="color:#999;font-size:12px;margin-top:24px">This link is valid for 30 minutes. If you didn't request this, you can safely ignore this email.</p>
+            <!-- <p style="color:#666;font-size:13px;line-height:1.6">Or copy this link:<br><a href="{$resetLink}" style="color:#2563eb;word-break:break-all">{$resetLink}</a></p> -->
+            <p style="color:#999;font-size:12px;margin-top:24px">This link is valid for 10 minutes. If you didn't request this, you can safely ignore this email.</p>
           </div>
         </div>
         HTML;

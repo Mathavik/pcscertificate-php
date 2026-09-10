@@ -34,7 +34,13 @@ const Register: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
-      const data = await res.json();
+      const responseText = await res.text();
+      let data: { message?: string } = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(`Registration endpoint returned HTTP ${res.status}`);
+      }
 
       if (!res.ok) {
         throw new Error(data.message || 'Registration failed');

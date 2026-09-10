@@ -26,7 +26,7 @@ class User
         return $stmt->fetch();
     }
 
-    public function create($name, $email, $passwordHash, $role = 'user')
+    public function create($name, $email, $passwordHash, $role = 'admin')
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, :role)"
@@ -44,15 +44,30 @@ class User
 
     public function createPasswordReset($email, $token, $expiresAt)
     {
-        $stmt = $this->pdo->prepare(
-            "INSERT INTO password_resets (email, token, expires_at) VALUES (:email, :token, :expires_at)
-             ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at), created_at = CURRENT_TIMESTAMP"
-        );
-        return $stmt->execute([
-            ':email'     => $email,
-            ':token'     => $token,
-            ':expires_at' => $expiresAt,
-        ]);
+        $this->pdo->beginTransaction();
+
+        try {
+            $delete = $this->pdo->prepare(
+                "DELETE FROM password_resets WHERE email = :email"
+            );
+            $delete->execute([':email' => $email]);
+
+            $insert = $this->pdo->prepare(
+                "INSERT INTO password_resets (email, token, expires_at)
+                 VALUES (:email, :token, :expires_at)"
+            );
+            $insert->execute([
+                ':email'      => $email,
+                ':token'      => $token,
+                ':expires_at' => $expiresAt,
+            ]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 
     public function findPasswordReset($email, $token)

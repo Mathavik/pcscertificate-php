@@ -48,7 +48,7 @@ if (!$user) {
 
 try {
     $token = bin2hex(random_bytes(32));
-    $expiresAt = date('Y-m-d H:i:s', time() + (60 * 30)); // 30 minutes
+    $expiresAt = date('Y-m-d H:i:s', time() + (60 * 10)); // 10 minutes
     $userModel->createPasswordReset($email, $token, $expiresAt);
 
     $frontendUrl = $_ENV['FRONTEND_URL'] ?? 'http://192.168.18.173:3000';
