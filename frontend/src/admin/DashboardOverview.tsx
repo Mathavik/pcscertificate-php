@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { authHeaders } from '../auth';
 
 const API_BASE = "http://192.168.18.173/pcsCertificate/backend/public";
@@ -71,8 +71,6 @@ const DashboardOverview: React.FC = () => {
 
   return (
     <div className="p-6">
-      <Toaster />
-
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
         <p className="text-sm text-slate-500 mt-1">Overview of your certificate system</p>

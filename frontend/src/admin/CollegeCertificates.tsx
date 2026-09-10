@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import CertificatePreview from './CertificatePreview';
 import { authHeaders } from '../auth';
 
@@ -123,8 +123,6 @@ const CollegeCertificates: React.FC = () => {
 
   return (
     <div className="p-6">
-      <Toaster />
-
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">College Certificates</h1>
         <p className="text-sm text-slate-500 mt-1">Select a college to view all issued certificates</p>
