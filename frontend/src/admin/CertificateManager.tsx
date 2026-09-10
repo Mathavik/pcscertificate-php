@@ -115,7 +115,23 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
           {saveStatus && <span className="text-sm text-slate-700">{saveStatus}</span>}
         </div>
       </div>
-
+ {/* Certificate Stats */}
+      {certificateStats.length > 0 && (
+        <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {certificateStats
+            .filter((stat) => stat.certificateTitle !== 'ATTENDANCE CERTIFICATE') 
+            .map((stat) => (
+              <div
+                key={stat.certificateTitle}
+                onClick={() => setSelectedTitle(selectedTitle === stat.certificateTitle ? null : stat.certificateTitle)}
+                className={`rounded-lg p-4 text-center cursor-pointer transition-all ${selectedTitle === stat.certificateTitle ? 'bg-blue-500 text-white shadow-lg scale-105' : 'bg-slate-100 hover:bg-slate-200'}`}
+              >
+                <p className={`text-xs uppercase font-semibold ${selectedTitle === stat.certificateTitle ? 'text-white' : 'text-slate-600'}`}>{stat.certificateTitle}</p>
+                <p className={`text-2xl font-bold ${selectedTitle === stat.certificateTitle ? 'text-white' : 'text-blue-900'}`}>{stat.count}</p>
+              </div>
+            ))}
+        </div>
+      )}
       {/* Date Filters */}
       <div className="mt-6 flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100 z-50 relative">
         {/* YEAR FILTER */}
@@ -200,23 +216,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
         )}
       </div>
 
-      {/* Certificate Stats */}
-      {certificateStats.length > 0 && (
-        <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {certificateStats
-            .filter((stat) => stat.certificateTitle !== 'ATTENDANCE CERTIFICATE') 
-            .map((stat) => (
-              <div
-                key={stat.certificateTitle}
-                onClick={() => setSelectedTitle(selectedTitle === stat.certificateTitle ? null : stat.certificateTitle)}
-                className={`rounded-lg p-4 text-center cursor-pointer transition-all ${selectedTitle === stat.certificateTitle ? 'bg-blue-500 text-white shadow-lg scale-105' : 'bg-slate-100 hover:bg-slate-200'}`}
-              >
-                <p className={`text-xs uppercase font-semibold ${selectedTitle === stat.certificateTitle ? 'text-white' : 'text-slate-600'}`}>{stat.certificateTitle}</p>
-                <p className={`text-2xl font-bold ${selectedTitle === stat.certificateTitle ? 'text-white' : 'text-blue-900'}`}>{stat.count}</p>
-              </div>
-            ))}
-        </div>
-      )}
+     
 
       {filteredCertificates.length === 0 ? (
         <div className="mt-6 text-sm text-slate-700 bg-slate-50 p-4 rounded-xl text-center border border-dashed border-slate-200">

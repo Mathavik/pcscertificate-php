@@ -61,6 +61,7 @@ const menuItems = [
 
 const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -81,21 +82,44 @@ const AdminLayout: React.FC = () => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${
+        className={`fixed inset-y-0 left-0 z-40 bg-slate-900 text-white transform transition-all duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${
+          collapsed ? 'w-20' : 'w-64'
+        } ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
-            <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+          <div className="flex items-center justify-between gap-3 px-4 py-5 border-b border-slate-700">
+            <div className="flex items-center gap-3 min-w-0">
+               {!collapsed && (
+              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+                )}
+              {!collapsed && (
+                <div className="min-w-0">
+                  <h1 className="text-base font-bold tracking-wide">PCS Certificate</h1>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest">Admin Panel</p>
+                </div>
+              )}
             </div>
-            <div>
-              <h1 className="text-base font-bold tracking-wide">PCS Certificate</h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Admin Panel</p>
-            </div>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="p-1.5 rounded-lg text-slate-300 hover:bg-white/10 hover:text-white transition-colors shrink-0"
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              )}
+            </button>
           </div>
 
           <nav className="flex-1 px-3 py-4 space-y-1">
@@ -105,7 +129,9 @@ const AdminLayout: React.FC = () => {
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  `relative group flex items-center rounded-lg text-sm font-medium transition-all ${
+                    collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
+                  } ${
                     isActive
                       ? 'bg-white/10 text-white shadow-sm'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white'
@@ -113,29 +139,39 @@ const AdminLayout: React.FC = () => {
                 }
               >
                 {item.icon}
-                {item.label}
+                {!collapsed && item.label}
+                {collapsed && (
+                  <span className="absolute left-full ml-2 px-2 py-1 rounded-md bg-slate-800 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 shadow-lg border border-slate-700">
+                    {item.label}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
 
           <div className="px-3 py-4 border-t border-slate-700">
-            <div className="flex items-center gap-3 px-3 py-2 mb-2">
+            <div className={`flex items-center mb-2 ${collapsed ? 'justify-center' : 'gap-3 px-3'}`}>
               <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-sm font-bold">
                 {authUser.name ? authUser.name.charAt(0).toUpperCase() : 'A'}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{authUser.name || 'Admin'}</p>
-                <p className="text-[10px] text-slate-400 truncate">{authUser.email || ''}</p>
-              </div>
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{authUser.name || 'Admin'}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{authUser.email || ''}</p>
+                </div>
+              )}
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all"
+              className={`w-full flex items-center rounded-lg text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all ${
+                collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
+              }`}
+              title="Logout"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              Logout
+              {!collapsed && 'Logout'}
             </button>
           </div>
         </div>
