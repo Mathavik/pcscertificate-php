@@ -130,7 +130,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ certificateId, 
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center" onClick={onClose}>
+      <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center" onClick={onClose}>
         <div className="bg-white rounded-2xl p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
           <p className="text-sm text-slate-500">Loading certificate...</p>
         </div>
@@ -144,7 +144,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ certificateId, 
   const isAcceptance = cert.certificateTitle?.includes('ACCEPTANCE');
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center overflow-y-auto py-10 px-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] bg-black/60 flex items-start justify-center overflow-y-auto py-10 px-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl max-w-[850px] w-full relative" onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
         <button

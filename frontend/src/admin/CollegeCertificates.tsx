@@ -127,6 +127,14 @@ const CollegeCertificates: React.FC = () => {
         <p className="text-sm text-slate-500 mt-1">Select a college to view all issued certificates</p>
       </div>
 
+      {/* Certificate Preview */}
+      {previewCertId && (
+        <CertificatePreview
+          certificateId={previewCertId}
+          onClose={() => setPreviewCertId(null)}
+        />
+      )}
+
       {/* College Dropdown + Total Count */}
       <div className="mb-6 relative z-[60]">
         <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
@@ -423,13 +431,6 @@ const CollegeCertificates: React.FC = () => {
         </div>
       )}
 
-      {/* Certificate Preview Modal */}
-      {previewCertId && (
-        <CertificatePreview
-          certificateId={previewCertId}
-          onClose={() => setPreviewCertId(null)}
-        />
-      )}
     </div>
   );
 };
