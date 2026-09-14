@@ -162,6 +162,17 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
             />
           </div>
 
+          {(p.certificateTitle.includes('ATTENDANCE') || p.certificateTitle.includes('INTERNSHIP')) && (
+            <div>
+              <label className="block text-[10px] font-bold uppercase">Department</label>
+              <input
+                value={p.department}
+                onChange={(e) => handleChange(idx, 'department', e.target.value)}
+                className="mt-1 w-full border px-3 py-2 text-sm rounded"
+              />
+            </div>
+          )}
+
           {!p.certificateTitle.includes('ACCEPTANCE') && (
             <div>
               <label className="block text-[10px] font-bold uppercase">Internship Title</label>
@@ -194,17 +205,6 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
               />
             </div>
           </div>
-
-          {(p.certificateTitle.includes('ATTENDANCE') || p.certificateTitle.includes('INTERNSHIP')) && (
-            <div>
-              <label className="block text-[10px] font-bold uppercase">Department</label>
-              <input
-                value={p.department}
-                onChange={(e) => handleChange(idx, 'department', e.target.value)}
-                className="mt-1 w-full border px-3 py-2 text-sm rounded"
-              />
-            </div>
-          )}
 
           {p.certificateTitle.includes('ACCEPTANCE') && (
             <>

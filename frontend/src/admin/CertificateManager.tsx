@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SavedCertificate } from './CertificateContext';
 import toast from 'react-hot-toast';
 
@@ -23,6 +23,13 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   
   const [isMonthOpen, setIsMonthOpen] = useState(false);
   const [isYearOpen, setIsYearOpen] = useState(false);
+
+  const PAGE_SIZE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedTitle, selectedYear, selectedMonth]);
 
   const formatDateForDisplay = (dateStr: string): string => {
     if (!dateStr) return '';
@@ -100,6 +107,11 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     setSelectedMonth('');
     setSelectedYear('');
   };
+
+  const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * PAGE_SIZE;
+  const paginatedCertificates = filteredCertificates.slice(startIndex, startIndex + PAGE_SIZE);
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
@@ -229,6 +241,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
           )}
         </div>
       ) : (
+        <>
         <div className="mt-4 overflow-x-auto">
           {(selectedTitle || selectedYear || selectedMonth) && (
             <div className="mb-3 flex items-center justify-between bg-blue-50/50 px-3 py-2 rounded-lg text-sm text-slate-700">
@@ -259,7 +272,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {filteredCertificates.map((c) => (
+              {paginatedCertificates.map((c) => (
                 <tr key={c.id} className="hover:bg-slate-50 border-b border-slate-100 last:border-0">
                   <td className="px-3 py-2">{c.id}</td>
                   <td className="px-3 py-2">{c.studentName}</td>
@@ -281,6 +294,40 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             </tbody>
           </table>
         </div>
+
+          {totalPages > 1 && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-slate-600">
+                Showing {startIndex + 1}–{Math.min(startIndex + PAGE_SIZE, filteredCertificates.length)} of {filteredCertificates.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(safePage - 1)}
+                  disabled={safePage <= 1}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ‹ Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+                  <button
+                    key={pg}
+                    onClick={() => setCurrentPage(pg)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${pg === safePage ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                  >
+                    {pg}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(safePage + 1)}
+                  disabled={safePage >= totalPages}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next ›
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

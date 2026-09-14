@@ -62,7 +62,7 @@ if ($userModel->findByEmail($email)) {
 
 try {
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    $id = $userModel->create($name, $email, $passwordHash, 'user');
+    $id = $userModel->create($name, $email, $passwordHash, 'admin');
     $user = $userModel->findById($id);
 
     http_response_code(201);

@@ -32,6 +32,13 @@ const CollegeCertificates: React.FC = () => {
   const [isInternshipTitleOpen, setIsInternshipTitleOpen] = useState(false);
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
 
+  const PAGE_SIZE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCollege, selectedCertTitle, selectedInternshipTitle, selectedDepartment]);
+
   useEffect(() => {
     fetchColleges();
   }, []);
@@ -119,6 +126,11 @@ const CollegeCertificates: React.FC = () => {
     setSelectedInternshipTitle('');
     setSelectedDepartment('');
   };
+
+  const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * PAGE_SIZE;
+  const paginatedCertificates = filteredCertificates.slice(startIndex, startIndex + PAGE_SIZE);
 
   return (
     <div className="p-6">
@@ -402,7 +414,7 @@ const CollegeCertificates: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {filteredCertificates.map((cert) => (
+                {paginatedCertificates.map((cert) => (
                   <tr key={cert.id} className="hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors">
                     <td className="px-4 py-3 text-slate-500">{cert.id}</td>
                     <td className="px-4 py-3 font-medium text-slate-800">{cert.studentName}</td>
@@ -428,6 +440,38 @@ const CollegeCertificates: React.FC = () => {
               </tbody>
             </table>
           </div>
+          {totalPages > 1 && (
+            <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-slate-600">
+                Showing {startIndex + 1}–{Math.min(startIndex + PAGE_SIZE, filteredCertificates.length)} of {filteredCertificates.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(safePage - 1)}
+                  disabled={safePage <= 1}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ‹ Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+                  <button
+                    key={pg}
+                    onClick={() => setCurrentPage(pg)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${pg === safePage ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                  >
+                    {pg}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(safePage + 1)}
+                  disabled={safePage >= totalPages}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next ›
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

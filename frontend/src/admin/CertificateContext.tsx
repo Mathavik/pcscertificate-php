@@ -55,7 +55,7 @@ export const defaultFields: CertificateFields = {
   date: '2026-03-30',
   certificateTitle: 'ATTENDANCE CERTIFICATE',
   projectTitle: 'ENTERPRISE WORKFLOW AUTOMATION SYSTEM',
-  certificateContent: 'This is to certify that {{student Name}} final year {{department}} student of {{college Name}} has successfully attended the Internship on "{{project Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. During this period, the student was present and actively participated in all the scheduled sessions. The student has demonstrated consistent attendance and engagement throughout the period.',
+  certificateContent: 'This is to certify that {{student Name}} final year {{department}} student of {{college Name}} has successfully attended the Internship on "{{internship Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. During this period, the student was present and actively participated in all the scheduled sessions. The student has demonstrated consistent attendance and engagement throughout the period.',
   signatoryTitle: 'For PCS Software Solutions',
   attendanceTotalDays: '84 (exclude Sundays and other government holidays)',
   attendanceDaysAttended: '73',
@@ -82,7 +82,7 @@ export const defaultPages: CertificateFields[] = [
   {
     ...defaultFields,
     certificateTitle: 'INTERNSHIP COMPLETION CERTIFICATE',
-    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the Internship on "{{project Title}}" under the guidance of PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be Good.`,
+    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the Internship on "{{internship Title}}" under the guidance of PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be Good.`,
     wishMessage: "We wish the student all the best in all future endeavours."
   },
   {
