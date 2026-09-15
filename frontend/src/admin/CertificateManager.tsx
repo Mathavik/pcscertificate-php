@@ -183,14 +183,21 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
         {/* MONTH FILTER */}
         <div className="flex flex-col gap-1 relative">
           <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Filter Month BY Date Feild</label>
-          <button
-            type="button"
-            onClick={() => { setIsMonthOpen(!isMonthOpen); setIsYearOpen(false); }}
-            className="flex items-center justify-between w-44 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
-          >
-            <span>{selectedMonth ? monthsList.find(m => m.value === selectedMonth)?.label : 'All Months'}</span>
-            <span className="text-xs text-slate-400">▼</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => { setIsMonthOpen(!isMonthOpen); setIsYearOpen(false); }}
+              className="flex items-center justify-between w-44 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
+            >
+              <span>{selectedMonth ? monthsList.find(m => m.value === selectedMonth)?.label : 'All Months'}</span>
+              <span className="text-xs text-slate-400">▼</span>
+            </button>
+            {selectedMonth && (
+              <span className="rounded-full bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
+                total certificates: {filteredCertificates.length}
+              </span>
+            )}
+          </div>
 
           {isMonthOpen && (
             <>
