@@ -121,7 +121,7 @@ type CertificateContextValue = {
   saveStatus: string;
   loadedCertificateId: number | undefined;
   pendingScrollRef: { current: number | null };
-  handleSaveCertificate: (index: number) => Promise<void>;
+  handleSaveCertificate: (index: number) => Promise<boolean>;
   loadIntoEditor: (c: SavedCertificate) => number;
   loadAdminCertificates: () => Promise<void>;
   handleChange: (index: number, key: keyof CertificateFields, value: any) => void;
@@ -188,7 +188,7 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
     return parsed;
   };
 
-  const handleSaveCertificate = async (index: number) => {
+  const handleSaveCertificate = async (index: number): Promise<boolean> => {
     const page = pagesData[index];
     const payload = { ...page, certificateTitle: page.certificateTitle.trim().replace(/\s+/g, " ").toUpperCase() };
     const snapshot = loadedSnapshot.current[index];
@@ -262,6 +262,7 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       // Reload admin certificates list
       await loadAdminCertificates();
+      return true;
     } catch (e) {
       console.error(e);
       setSaveStatus("Save failed");
@@ -269,6 +270,7 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
         duration: 3000,
         position: 'top-right',
       });
+      return false;
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useCerts, formatDateForDisplay, CertificateFields } from './CertificateContext';
@@ -25,6 +25,7 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
 
   const pageRefs = useRef<Array<HTMLElement | null>>([null, null, null]);
   const textareaRefs = useRef<Array<HTMLTextAreaElement | null>>([null, null, null]);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (pendingScrollRef.current === index) {
@@ -108,13 +109,23 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
           </div>
           <button
             type="button"
-            onClick={() => handleSaveCertificate(idx)}
+            onClick={async () => {
+              if (!editMode) {
+                setEditMode(true);
+                return;
+              }
+              const ok = await handleSaveCertificate(idx);
+              if (ok) {
+                setEditMode(false);
+              }
+            }}
             className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
           >
-            💾 Save
+            {editMode ? '💾 Save' : '✏️ Edit'}
           </button>
         </div>
 
+        <fieldset className="mt-4 space-y-4 border-0 p-0 m-0" disabled={!editMode}>
         <div>
           <label className="block text-[10px] font-bold uppercase">Date</label>
           <input
@@ -412,6 +423,7 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
             />
           </div>
         )}
+        </fieldset>
       </div>
     );
   };

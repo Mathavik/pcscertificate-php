@@ -151,6 +151,7 @@ const CertificateGenerator: React.FC = () => {
   const [loadedCertificateId, setLoadedCertificateId] = useState<number | undefined>(undefined);
   const loadedSnapshot = useRef<Array<CertificateFields | null>>([null, null, null]);
   const [reviewName, setReviewName] = useState<string[]>([defaultFields.studentName, defaultFields.studentName, defaultFields.studentName]);
+  const [editModes, setEditModes] = useState<boolean[]>([false, false, false]);
 
 
   const togglePageSelection = (index: number) => {
@@ -206,7 +207,7 @@ const CertificateGenerator: React.FC = () => {
     return parsed;
   };
 
-  const handleSaveCertificate = async (index: number) => {
+  const handleSaveCertificate = async (index: number): Promise<boolean> => {
     const page = pagesData[index];
     const payload = { ...page, certificateTitle: page.certificateTitle.trim().replace(/\s+/g, " ").toUpperCase() };
     const snapshot = loadedSnapshot.current[index];
@@ -280,6 +281,7 @@ const CertificateGenerator: React.FC = () => {
 
       // Reload admin certificates list
       await loadAdminCertificates();
+      return true;
     } catch (e) {
       console.error(e);
       setSaveStatus("Save failed");
@@ -287,6 +289,7 @@ const CertificateGenerator: React.FC = () => {
         duration: 3000,
         position: 'top-right',
       });
+      return false;
     }
   };
 
@@ -499,13 +502,31 @@ const CertificateGenerator: React.FC = () => {
           </div>
           <button
             type="button"
-            onClick={() => handleSaveCertificate(index)}
+            onClick={async () => {
+              if (!editModes[index]) {
+                setEditModes((prev) => {
+                  const copy = [...prev];
+                  copy[index] = true;
+                  return copy;
+                });
+                return;
+              }
+              const ok = await handleSaveCertificate(index);
+              if (ok) {
+                setEditModes((prev) => {
+                  const copy = [...prev];
+                  copy[index] = false;
+                  return copy;
+                });
+              }
+            }}
             className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
           >
-            💾 Save
+            {editModes[index] ? '💾 Save' : '✏️ Edit'}
           </button>
         </div>
 
+        <fieldset className="mt-4 space-y-4 border-0 p-0 m-0" disabled={!editModes[index]}>
         <div>
           <label className="block text-[10px] font-bold uppercase">Date</label>
           <input
@@ -782,6 +803,7 @@ const CertificateGenerator: React.FC = () => {
             />
           </div>
         )}
+        </fieldset>
       </div>
     );
   };

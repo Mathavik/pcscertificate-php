@@ -38,8 +38,20 @@ class Certificate
         $data['createdAt'] = $now;
         $data['updatedAt'] = $now;
 
+        // ✅ Reuse lowest available id (fill gaps left by deleted rows)
+        $stmt = $this->pdo->query(
+            "SELECT t1.id + 1 AS nextId
+             FROM certificates t1
+             LEFT JOIN certificates t2 ON t2.id = t1.id + 1
+             WHERE t2.id IS NULL
+             ORDER BY t1.id
+             LIMIT 1"
+        );
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data['id'] = $row ? (int)$row['nextId'] : 1;
+
         $sql = "INSERT INTO certificates (
-                    studentName, collegeName, fromDate, toDate, date, certificateTitle,
+                    id, studentName, collegeName, fromDate, toDate, date, certificateTitle,
                     projectTitle, certificateContent, signatoryTitle, attendanceTotalDays,
                     attendanceDaysAttended, attendancePercentage, internshipTitle,
                     internshipCompletionTitle, position, department, reportingManager,
@@ -47,7 +59,7 @@ class Certificate
                     hideLocation, wishMessage, signatureImage, serialNumber, qrCode,
                     createdAt, updatedAt
                 ) VALUES (
-                    :studentName, :collegeName, :fromDate, :toDate, :date, :certificateTitle,
+                    :id, :studentName, :collegeName, :fromDate, :toDate, :date, :certificateTitle,
                     :projectTitle, :certificateContent, :signatoryTitle, :attendanceTotalDays,
                     :attendanceDaysAttended, :attendancePercentage, :internshipTitle,
                     :internshipCompletionTitle, :position, :department, :reportingManager,
@@ -57,7 +69,7 @@ class Certificate
                 )";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($data);
-        return $this->pdo->lastInsertId();
+        return (int)$data['id'];
     }
 
     // Update certificate by id (do not allow serialNumber or qrCode update)
