@@ -2,14 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { SavedCertificate } from './CertificateContext';
 import toast from 'react-hot-toast';
 
-type SearchField = 'studentName' | 'certificateTitle' | 'internshipTitle';
-
-const SEARCH_FIELDS: Array<{ value: SearchField; label: string }> = [
-  { value: 'studentName', label: 'Student Name' },
-  { value: 'certificateTitle', label: 'Certificate' },
-  { value: 'internshipTitle', label: 'Internship Title' },
-];
-
 type CertificateManagerProps = {
   certificateStats: Array<{ certificateTitle: string; count: number }>;
   adminCertificates: SavedCertificate[];
@@ -33,17 +25,15 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   const [isYearOpen, setIsYearOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Search: pick a field from the dropdown, then type to filter
-  const [searchField, setSearchField] = useState<'' | SearchField>('');
+  // Search by student name
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedTitle, selectedYear, selectedMonth, searchField, searchQuery]);
+  }, [selectedTitle, selectedYear, selectedMonth, searchQuery]);
 
   const formatDateForDisplay = (dateStr: string): string => {
     if (!dateStr) return '';
@@ -115,11 +105,10 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     const matchesYear = selectedYear ? (parsed ? parsed.year === selectedYear : false) : true;
     const matchesMonth = selectedMonth ? (parsed ? parsed.month === selectedMonth : false) : true;
 
-    // Case-insensitive partial match against the chosen field only
-    const matchesSearch =
-      searchField && normalizedQuery
-        ? String(c[searchField] ?? '').toLowerCase().includes(normalizedQuery)
-        : true;
+    // Case-insensitive partial match on student name
+    const matchesSearch = normalizedQuery
+      ? String(c.studentName ?? '').toLowerCase().includes(normalizedQuery)
+      : true;
 
     return matchesTitle && matchesYear && matchesMonth && matchesSearch;
   });
@@ -128,7 +117,6 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     setSelectedTitle(null);
     setSelectedMonth('');
     setSelectedYear('');
-    setSearchField('');
     setSearchQuery('');
   };
 
@@ -136,7 +124,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     (selectedTitle ? 1 : 0) +
     (selectedYear ? 1 : 0) +
     (selectedMonth ? 1 : 0) +
-    (searchField && searchQuery.trim() ? 1 : 0);
+    (normalizedQuery ? 1 : 0);
 
   const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
@@ -274,71 +262,32 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
           )}
         </div>
 
-        {/* SEARCH BY - field dropdown + search box */}
+        {/* SEARCH BY STUDENT NAME */}
         <div className="flex flex-col gap-1 relative">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Search By</label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => { setIsSearchOpen(!isSearchOpen); setIsYearOpen(false); setIsMonthOpen(false); }}
-              className="flex items-center justify-between w-48 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
-            >
-              <span className="truncate">
-                {searchField ? SEARCH_FIELDS.find((f) => f.value === searchField)?.label : '-- Search By --'}
-              </span>
-              <span className="text-xs text-slate-400">▼</span>
-            </button>
-
-            {/* Search box appears only once a field is chosen */}
-            {searchField && (
-              <div className="relative">
-                <input
-                  type="text"
-                  autoFocus
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={`Search ${SEARCH_FIELDS.find((f) => f.value === searchField)?.label}...`}
-                  className="w-56 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    aria-label="Clear search"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
+          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Search Student Name</label>
+          <div className="relative w-64">
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search Student Name..."
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 pr-8 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+              >
+                ✕
+              </button>
             )}
           </div>
-
-          {isSearchOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setIsSearchOpen(false)} />
-              <div className="absolute top-full left-0 mt-1 w-48 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl z-20 py-1">
-                <button
-                  onClick={() => { setSearchField(''); setSearchQuery(''); setIsSearchOpen(false); }}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-slate-100 text-slate-700"
-                >
-                  -- Search By --
-                </button>
-                {SEARCH_FIELDS.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => { setSearchField(f.value); setSearchQuery(''); setIsSearchOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${searchField === f.value ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
         </div>
 
-        {(selectedTitle || selectedYear || selectedMonth || (searchField && searchQuery.trim())) && (
+        {(selectedTitle || selectedYear || selectedMonth || normalizedQuery) && (
           <button
             onClick={clearAllFilters}
             className="mt-5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold px-3 py-2 transition-all"
@@ -366,7 +315,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
       ) : (
         <>
         <div className="mt-4 overflow-x-auto">
-          {(selectedTitle || selectedYear || selectedMonth || (searchField && searchQuery.trim())) && (
+          {(selectedTitle || selectedYear || selectedMonth || normalizedQuery) && (
             <div className="mb-3 flex items-center justify-between bg-blue-50/50 px-3 py-2 rounded-lg text-sm text-slate-700">
               <div className="flex flex-wrap gap-2 items-center">
                 <span className="font-semibold">Active Filters:</span>
@@ -377,9 +326,9 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
                     Month: {monthsList.find(m => m.value === selectedMonth)?.label}
                   </span>
                 )}
-                {searchField && searchQuery.trim() && (
+                {normalizedQuery && (
                   <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs">
-                    {SEARCH_FIELDS.find((f) => f.value === searchField)?.label}: {searchQuery.trim()}
+                    Student Name: {searchQuery.trim()}
                   </span>
                 )}
               </div>
