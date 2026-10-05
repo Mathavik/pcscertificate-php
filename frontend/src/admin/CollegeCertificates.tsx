@@ -49,6 +49,7 @@ const CollegeCertificates: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [isYearOpen, setIsYearOpen] = useState(false);
   const [isMonthOpen, setIsMonthOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -99,6 +100,7 @@ const CollegeCertificates: React.FC = () => {
     setSearchQuery('');
     setSelectedYear('');
     setSelectedMonth('');
+    setIsFilterOpen(false);
     if (college) {
       fetchCertificates(college);
     } else {
@@ -209,6 +211,14 @@ const CollegeCertificates: React.FC = () => {
 
   const hasActiveSearch = !!(searchField && searchQuery.trim());
 
+  const activeFilterCount =
+    (selectedCertTitle ? 1 : 0) +
+    (selectedInternshipTitle ? 1 : 0) +
+    (selectedDepartment ? 1 : 0) +
+    (selectedYear ? 1 : 0) +
+    (selectedMonth ? 1 : 0) +
+    (hasActiveSearch ? 1 : 0);
+
   const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
   const startIndex = (safePage - 1) * PAGE_SIZE;
@@ -289,11 +299,31 @@ const CollegeCertificates: React.FC = () => {
               <span className="text-2xl font-bold text-blue-700 leading-none">{certificates.length}</span>
             </div>
           )}
+
+          {/* Filter toggle button - right aligned in the same row */}
+          {certificates.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="ml-auto inline-flex items-center gap-2 self-start rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              {isFilterOpen ? 'Hide Filter' : 'Filter'}
+              {activeFilterCount > 0 && (
+                <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+              <span className={`text-xs transition-transform ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Certificate & Internship Title Filters */}
-      {selectedCollege && certificates.length > 0 && (
+      {selectedCollege && certificates.length > 0 && isFilterOpen && (
         <div className="mb-6 flex flex-wrap items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 z-50 relative">
           {/* Certificate Title Filter */}
           <div className="flex flex-col gap-1 relative">

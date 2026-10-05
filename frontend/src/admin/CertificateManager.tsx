@@ -31,6 +31,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   
   const [isMonthOpen, setIsMonthOpen] = useState(false);
   const [isYearOpen, setIsYearOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Search: pick a field from the dropdown, then type to filter
   const [searchField, setSearchField] = useState<'' | SearchField>('');
@@ -171,8 +172,29 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             ))}
         </div>
       )}
+      {/* Filter toggle button */}
+      <div className="mt-5">
+        <button
+          type="button"
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-700 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          {isFilterOpen ? 'Hide Filter' : 'Filter'}
+          {activeFilterCount > 0 && (
+            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+              {activeFilterCount}
+            </span>
+          )}
+          <span className={`text-xs transition-transform ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
+        </button>
+      </div>
+
       {/* Date Filters */}
-      <div className="mt-6 flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100 z-50 relative">
+      {isFilterOpen && (
+      <div className="mt-4 flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100 z-50 relative">
         {/* YEAR FILTER */}
         <div className="flex flex-col gap-1 relative">
           <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Filter Year</label>
@@ -325,6 +347,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
           </button>
         )}
       </div>
+      )}
 
      
 
