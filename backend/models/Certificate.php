@@ -25,6 +25,10 @@ class Certificate
                 $data[$field] = 0; // default if missing
             }
         }
+
+        // showQrCode is opt-in: keep visible when the client does not send it
+        // (older clients / legacy rows) so existing certificates are unaffected.
+        $data['showQrCode'] = isset($data['showQrCode']) ? ($data['showQrCode'] ? 1 : 0) : 1;
     }
 
     // Create a new certificate
@@ -56,7 +60,7 @@ class Certificate
                     attendanceDaysAttended, attendancePercentage, internshipTitle,
                     internshipCompletionTitle, position, department, reportingManager,
                     location, hideReportingManager, hidePosition, hideDepartment,
-                    hideLocation, wishMessage, signatureImage, serialNumber, qrCode,
+                    hideLocation, showQrCode, wishMessage, signatureImage, serialNumber, qrCode,
                     createdAt, updatedAt
                 ) VALUES (
                     :id, :studentName, :collegeName, :fromDate, :toDate, :date, :certificateTitle,
@@ -64,7 +68,7 @@ class Certificate
                     :attendanceDaysAttended, :attendancePercentage, :internshipTitle,
                     :internshipCompletionTitle, :position, :department, :reportingManager,
                     :location, :hideReportingManager, :hidePosition, :hideDepartment,
-                    :hideLocation, :wishMessage, :signatureImage, :serialNumber, :qrCode,
+                    :hideLocation, :showQrCode, :wishMessage, :signatureImage, :serialNumber, :qrCode,
                     :createdAt, :updatedAt
                 )";
         $stmt = $this->pdo->prepare($sql);

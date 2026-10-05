@@ -7,11 +7,22 @@ interface CertificateData {
     studentName: string;
     collegeName: string;
     projectTitle: string;
+    internshipTitle: string;
+    internshipCompletionTitle?: string;
+    department?: string;
     certificateTitle: string;
     fromDate: string;
     toDate: string;
     issuedDate?: string;
     grade?: string;
+}
+
+// ✅ fromDate / toDate are nullable in the DB - never call .split() on them directly
+function formatDateForDisplay(dateStr?: string | null): string {
+    if (!dateStr) return '-';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    return dateStr;
 }
 
 export default function VerifyCertificate() {
@@ -163,9 +174,20 @@ export default function VerifyCertificate() {
                                     Internship Title
                                 </label>
                                 <p className="text-gray-700 text-base bg-blue-50/50 px-4 py-2 rounded-lg border border-blue-100/50 inline-block">
-                                    {certificate.projectTitle}
+                                    {certificate.internshipTitle || certificate.projectTitle || '-'}
                                 </p>
                             </div>
+
+                            {certificate.internshipTitle && certificate.projectTitle && (
+                                <div className="col-span-1 sm:col-span-2">
+                                    <label className="text-xs text-gray-400 uppercase tracking-wider font-medium block mb-1">
+                                        Project Title
+                                    </label>
+                                    <p className="text-gray-700 text-base">
+                                        {certificate.projectTitle}
+                                    </p>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="text-xs text-gray-400 uppercase tracking-wider font-medium block mb-1">
@@ -195,7 +217,7 @@ export default function VerifyCertificate() {
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {certificate.fromDate.split('-').length === 3 ? certificate.fromDate.split('-').reverse().join('.') : certificate.fromDate}
+                                    {formatDateForDisplay(certificate.fromDate)}
                                 </p>
                             </div>
 
@@ -207,7 +229,7 @@ export default function VerifyCertificate() {
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {certificate.toDate.split('-').length === 3 ? certificate.toDate.split('-').reverse().join('.') : certificate.toDate}
+                                    {formatDateForDisplay(certificate.toDate)}
                                 </p>
                             </div>
                         </div>

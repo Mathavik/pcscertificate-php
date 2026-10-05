@@ -28,6 +28,7 @@ export type CertificateFields = {
   hidePosition: boolean;
   hideDepartment: boolean;
   hideLocation: boolean;
+  showQrCode: boolean;
 };
 
 export type SavedCertificate = CertificateFields & {
@@ -65,13 +66,14 @@ export const defaultFields: CertificateFields = {
   internshipTitle: "Internship cum College Project",
   internshipCompletionTitle: "Internship Completion Certificate",
   position: "Intern – Project Trainee",
-  department: "Web Development",
+  department: "M.SC",
   reportingManager: "Surya G, Training Head",
   location: "Surandai-Tenkasi, Tamil Nadu",
   hideReportingManager: false,
   hidePosition: false,
   hideDepartment: false,
   hideLocation: false,
+  showQrCode: true,
 };
 
 export const defaultPages: CertificateFields[] = [
@@ -83,7 +85,8 @@ export const defaultPages: CertificateFields[] = [
     ...defaultFields,
     certificateTitle: 'INTERNSHIP COMPLETION CERTIFICATE',
     certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the Internship on "{{internship Title}}" under the guidance of PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be Good.`,
-    wishMessage: "We wish the student all the best in all future endeavours."
+    wishMessage: "We wish the student all the best in all future endeavours.",
+    showQrCode: false
   },
   {
     ...defaultFields,
@@ -316,6 +319,8 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
       hidePosition: !!c.hidePosition,
       hideDepartment: !!c.hideDepartment,
       hideLocation: !!c.hideLocation,
+      // Legacy rows (saved before the toggle existed) fall back to visible.
+      showQrCode: c.showQrCode === undefined || c.showQrCode === null ? true : !!c.showQrCode,
     };
     loadedSnapshot.current[pageIndex] = loadedFields;
 

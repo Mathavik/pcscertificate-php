@@ -29,6 +29,7 @@ type CertificateData = {
   hidePosition: boolean;
   hideDepartment: boolean;
   hideLocation: boolean;
+  showQrCode?: boolean | number;
   serialNumber: string;
   qrCode: string;
 };
@@ -247,7 +248,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ certificateId, 
               </div>
             )}
 
-            {cert.qrCode && (
+            {cert.qrCode && cert.showQrCode !== 0 && cert.showQrCode !== false && (
               <div style={{ marginTop: "-150px", marginLeft: "-3px" }}>
                 <img src={cert.qrCode} alt="QR Code" style={{ width: "120px", height: "120px" }} />
                 <p style={{ fontSize: '16px', textAlign: 'start', marginLeft: "5px", marginTop: '2px', color: '#000' }}>

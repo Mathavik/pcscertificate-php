@@ -324,6 +324,35 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
           )}
         </div>
 
+        <div className="rounded border border-slate-300 bg-white p-3">
+          <div className="flex items-center justify-between">
+            <div className="pr-2">
+              <label className="block text-[10px] font-bold uppercase">
+                Scan QR to verify
+              </label>
+              <p className="text-[9px] text-slate-500 leading-snug">
+                Show the QR code block on this certificate
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={p.showQrCode}
+              aria-label="Show Scan QR to verify section"
+              onClick={() => handleChange(idx, 'showQrCode', !p.showQrCode)}
+              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                p.showQrCode ? 'bg-emerald-600' : 'bg-slate-300'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
+                  p.showQrCode ? 'left-[18px]' : 'left-0.5'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase">Signature Image</label>
           <input
@@ -524,7 +553,7 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
                     </div>
                   </div>
                 )}
-                {qrCodes[index] && (
+                {page.showQrCode && qrCodes[index] && (
                   <div style={{ marginTop: "-150px", marginLeft: "-3px" }}>
                     <img
                       src={qrCodes[index]}
