@@ -4,6 +4,14 @@ import CertificatePreview from './CertificatePreview';
 import { authHeaders } from '../auth';
 import { API_BASE } from '../config';
 
+type SearchField = 'studentName' | 'certificateTitle' | 'internshipTitle';
+
+const SEARCH_FIELDS: Array<{ value: SearchField; label: string }> = [
+  { value: 'studentName', label: 'Student Name' },
+  { value: 'certificateTitle', label: 'Certificate' },
+  { value: 'internshipTitle', label: 'Internship Title' },
+];
+
 type CollegeCertificate = {
   id: number;
   studentName: string;
@@ -32,12 +40,22 @@ const CollegeCertificates: React.FC = () => {
   const [isInternshipTitleOpen, setIsInternshipTitleOpen] = useState(false);
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
 
+  // Search: pick a field from the dropdown, then type to filter
+  const [searchField, setSearchField] = useState<'' | SearchField>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [isYearOpen, setIsYearOpen] = useState(false);
+  const [isMonthOpen, setIsMonthOpen] = useState(false);
+
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCollege, selectedCertTitle, selectedInternshipTitle, selectedDepartment]);
+  }, [selectedCollege, selectedCertTitle, selectedInternshipTitle, selectedDepartment, searchField, searchQuery, selectedYear, selectedMonth]);
 
   useEffect(() => {
     fetchColleges();
@@ -77,6 +95,10 @@ const CollegeCertificates: React.FC = () => {
     setSelectedCertTitle('');
     setSelectedInternshipTitle('');
     setSelectedDepartment('');
+    setSearchField('');
+    setSearchQuery('');
+    setSelectedYear('');
+    setSelectedMonth('');
     if (college) {
       fetchCertificates(college);
     } else {
@@ -107,11 +129,65 @@ const CollegeCertificates: React.FC = () => {
     new Set(certificates.map((c) => c.department).filter(Boolean))
   ).sort();
 
+  const parseCertDate = (raw: string): { day: string; month: string; year: string } | null => {
+    if (!raw) return null;
+    // Support DD.MM.YYYY
+    const dotParts = raw.split('.');
+    if (dotParts.length === 3 && dotParts[2].length === 4) {
+      return { day: dotParts[0], month: dotParts[1], year: dotParts[2] };
+    }
+    // Support YYYY-MM-DD
+    if (raw.includes('-')) {
+      const parts = raw.split('-');
+      if (parts.length === 3) return { day: parts[2], month: parts[1], year: parts[0] };
+    }
+    return null;
+  };
+
+  const availableYears = Array.from(
+    new Set(
+      certificates
+        .map((c) => {
+          const parsed = parseCertDate(c.date);
+          return parsed ? parsed.year : null;
+        })
+        .filter((year): year is string => year !== null)
+    )
+  ).sort();
+
+  const monthsList = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
   const filteredCertificates = certificates.filter((c) => {
     const matchesCertTitle = selectedCertTitle ? c.certificateTitle === selectedCertTitle : true;
     const matchesInternshipTitle = selectedInternshipTitle ? (c.internshipTitle || '') === selectedInternshipTitle : true;
     const matchesDepartment = selectedDepartment ? (c.department || '') === selectedDepartment : true;
-    return matchesCertTitle && matchesInternshipTitle && matchesDepartment;
+    // Case-insensitive partial match against the chosen field only
+    const matchesSearch =
+      searchField && normalizedQuery
+        ? String(c[searchField] ?? '').toLowerCase().includes(normalizedQuery)
+        : true;
+
+    // Only apply month/year filtering when a filter is actually selected
+    const parsed = parseCertDate(c.date);
+    const matchesYear = selectedYear ? (parsed ? parsed.year === selectedYear : false) : true;
+    const matchesMonth = selectedMonth ? (parsed ? parsed.month === selectedMonth : false) : true;
+
+    return matchesCertTitle && matchesInternshipTitle && matchesDepartment && matchesSearch && matchesYear && matchesMonth;
   });
 
   const distinctStudentCountForInternship = (title: string) =>
@@ -125,7 +201,13 @@ const CollegeCertificates: React.FC = () => {
     setSelectedCertTitle('');
     setSelectedInternshipTitle('');
     setSelectedDepartment('');
+    setSearchField('');
+    setSearchQuery('');
+    setSelectedYear('');
+    setSelectedMonth('');
   };
+
+  const hasActiveSearch = !!(searchField && searchQuery.trim());
 
   const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
@@ -360,7 +442,158 @@ const CollegeCertificates: React.FC = () => {
             )}
           </div>
 
-          {(selectedCertTitle || selectedInternshipTitle || selectedDepartment) && (
+          {/* YEAR FILTER */}
+          <div className="flex flex-col gap-1 relative">
+            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+              Filter Year
+            </label>
+            <button
+              type="button"
+              onClick={() => { setIsYearOpen(!isYearOpen); setIsCertTitleOpen(false); setIsInternshipTitleOpen(false); setIsDepartmentOpen(false); setIsSearchOpen(false); setIsMonthOpen(false); }}
+              className="flex items-center justify-between w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
+            >
+              <span>{selectedYear ? selectedYear : 'All Years'}</span>
+              <span className="text-xs text-slate-400">▼</span>
+            </button>
+
+            {isYearOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsYearOpen(false)} />
+                <div className="absolute top-full left-0 mt-1 w-40 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl z-20 py-1">
+                  <button
+                    onClick={() => { setSelectedYear(''); setIsYearOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${selectedYear === '' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                  >
+                    All Years
+                  </button>
+                  {availableYears.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => { setSelectedYear(year); setIsYearOpen(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${selectedYear === year ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* MONTH FILTER */}
+          <div className="flex flex-col gap-1 relative">
+            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+              Filter Month BY Date Feild
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setIsMonthOpen(!isMonthOpen); setIsCertTitleOpen(false); setIsInternshipTitleOpen(false); setIsDepartmentOpen(false); setIsSearchOpen(false); setIsYearOpen(false); }}
+                className="flex items-center justify-between w-44 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
+              >
+                <span>{selectedMonth ? monthsList.find(m => m.value === selectedMonth)?.label : 'All Months'}</span>
+                <span className="text-xs text-slate-400">▼</span>
+              </button>
+              {selectedMonth && (
+                <span className="rounded-full bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
+                  total certificates: {filteredCertificates.length}
+                </span>
+              )}
+            </div>
+
+            {isMonthOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsMonthOpen(false)} />
+                <div className="absolute top-full left-0 mt-1 w-44 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl z-20 py-1">
+                  <button
+                    onClick={() => { setSelectedMonth(''); setIsMonthOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${selectedMonth === '' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                  >
+                    All Months
+                  </button>
+                  {monthsList.map((m) => (
+                    <button
+                      key={m.value}
+                      onClick={() => { setSelectedMonth(m.value); setIsMonthOpen(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${selectedMonth === m.value ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Search By - field dropdown + search box */}
+          <div className="flex flex-col gap-1 relative">
+            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+              Search By
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setIsSearchOpen(!isSearchOpen); setIsCertTitleOpen(false); setIsInternshipTitleOpen(false); setIsDepartmentOpen(false); setIsYearOpen(false); setIsMonthOpen(false); }}
+                className="flex items-center justify-between w-48 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none text-left"
+              >
+                <span className="truncate">
+                  {searchField ? SEARCH_FIELDS.find((f) => f.value === searchField)?.label : '-- Search By --'}
+                </span>
+                <svg className={`w-4 h-4 text-slate-400 transition-transform ${isSearchOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Search box appears only once a field is chosen */}
+              {searchField && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={`Search ${SEARCH_FIELDS.find((f) => f.value === searchField)?.label}...`}
+                    className="w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Clear search"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {isSearchOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsSearchOpen(false)} />
+                <div className="absolute top-full left-0 mt-1 w-48 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl z-20 py-1">
+                  <button
+                    onClick={() => { setSearchField(''); setSearchQuery(''); setIsSearchOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-slate-100 text-slate-700"
+                  >
+                    -- Search By --
+                  </button>
+                  {SEARCH_FIELDS.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => { setSearchField(f.value); setSearchQuery(''); setIsSearchOpen(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 ${searchField === f.value ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-slate-700'}`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {(selectedCertTitle || selectedInternshipTitle || selectedDepartment || selectedYear || selectedMonth || hasActiveSearch) && (
             <button
               onClick={clearFilters}
               className="mt-5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold px-3 py-2 transition-all"
