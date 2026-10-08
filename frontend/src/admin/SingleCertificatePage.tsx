@@ -65,6 +65,24 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
     );
   };
 
+  // Keeps only characters that are safe for a file name
+  const sanitizeFileName = (value: string) =>
+    (value || '')
+      .replace(/[\\/:*?"<>|]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  // File name = certificateTitle + studentName
+  // reviewName holds the name currently shown on the certificate
+  // (pagesData.studentName is cleared after a save).
+  const buildPdfFileName = (idx: number) => {
+    const data = pagesData[idx];
+    const title = sanitizeFileName(data?.certificateTitle) || `Certificate ${idx + 1}`;
+    const student = sanitizeFileName(reviewName[idx]) || sanitizeFileName(data?.studentName);
+
+    return student ? `${title}_${student}.pdf` : `${title}.pdf`;
+  };
+
   const downloadSinglePDF = async (idx: number) => {
     const page = pageRefs.current[idx];
     if (!page) return;
@@ -87,7 +105,7 @@ const SingleCertificatePage: React.FC<{ index: number }> = ({ index }) => {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
-      pdf.save(`${pagesData[idx].certificateTitle}_${pagesData[idx].studentName}.pdf`);
+      pdf.save(buildPdfFileName(idx));
     } catch (error) {
       console.error('Error generating PDF:', error);
     }

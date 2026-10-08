@@ -178,17 +178,6 @@ export default function VerifyCertificate() {
                                 </p>
                             </div>
 
-                            {certificate.internshipTitle && certificate.projectTitle && (
-                                <div className="col-span-1 sm:col-span-2">
-                                    <label className="text-xs text-gray-400 uppercase tracking-wider font-medium block mb-1">
-                                        Project Title
-                                    </label>
-                                    <p className="text-gray-700 text-base">
-                                        {certificate.projectTitle}
-                                    </p>
-                                </div>
-                            )}
-
                             <div>
                                 <label className="text-xs text-gray-400 uppercase tracking-wider font-medium block mb-1">
                                     Certificate Type

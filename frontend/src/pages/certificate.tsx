@@ -87,7 +87,7 @@ const defaultPages: CertificateFields[] = [
   {
     ...defaultFields,
     certificateTitle: 'INTERNSHIP COMPLETION CERTIFICATE',
-    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the Internship on "{{internship Title}}" under the guidance of PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be Good.`,
+    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the Internship on "{{internship Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. The performance during this period was found to be Good.`,
     wishMessage: "We wish the student all the best in all future endeavours.",
     showQrCode: false
   },
