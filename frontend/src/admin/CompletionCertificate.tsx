@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useCerts, CertificateFields } from './CertificateContext';
+import { authHeaders } from '../auth';
+import { API_BASE } from '../config';
+import toast from 'react-hot-toast';
 
 // Certificate Completion uses its own dedicated editor/page.
 // It shares only the saved data slot (index 3) with the CertificateContext.
@@ -46,16 +49,14 @@ const writeCompletionOptions = (content: string, options: CompletionOptions) => 
 const CompletionCertificate: React.FC = () => {
   const {
     pagesData,
-    qrCodes,
-    currentCertificateIds,
     reviewName,
     pendingScrollRef,
-    handleSaveCertificate,
     handleChange,
   } = useCerts();
 
   const pageRef = useRef<HTMLElement | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const index = PAGE_INDEX;
   const page = pagesData[index];
@@ -63,6 +64,42 @@ const CompletionCertificate: React.FC = () => {
 
   const updateCompletionOptions = (options: CompletionOptions) => {
     handleChange(index, 'certificateContent', writeCompletionOptions(page.certificateContent, options));
+  };
+
+  const saveCompletionCertificate = async () => {
+    if (completionOptions.completionTypes.length === 0) {
+      toast.error('Please select Internship, Course, or Project before saving.');
+      return false;
+    }
+
+    const payload = {
+      serialNumber: completionOptions.certificateNumber.trim(),
+      completionType: completionOptions.completionTypes,
+      certificateTitle: page.certificateTitle.trim().replace(/\s+/g, ' ').toUpperCase(),
+    };
+
+    try {
+      setIsSaving(true);
+      const response = await fetch(`${API_BASE}/completion_certificates.php`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      const saved = await response.json();
+      if (!response.ok) {
+        throw new Error(saved.message || 'Unable to save completion certificate.');
+      }
+
+      updateCompletionOptions({ ...completionOptions, completionTypes: [] });
+      toast.success('Completion Certificate Saved!');
+      return true;
+    } catch (error) {
+      console.error('Unable to save Certificate Completion:', error);
+      toast.error(error instanceof Error ? error.message : 'Unable to save completion certificate.');
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -139,27 +176,24 @@ const CompletionCertificate: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider">✏️ EDIT {p.certificateTitle}</h3>
-          {currentCertificateIds[index] !== undefined ? (
-            <p className="text-[10px] text-slate-500 mt-1">Editing saved certificate id={currentCertificateIds[index]}</p>
-          ) : (
-            <p className="text-[10px] text-slate-500 mt-1">New certificate will be created on save</p>
-          )}
+          <p className="text-[10px] text-slate-500 mt-1">Each save creates a new completion certificate record</p>
         </div>
         <button
           type="button"
+          disabled={isSaving}
           onClick={async () => {
             if (!editMode) {
               setEditMode(true);
               return;
             }
-            const ok = await handleSaveCertificate(index);
+            const ok = await saveCompletionCertificate();
             if (ok) {
               setEditMode(false);
             }
           }}
           className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
         >
-          {editMode ? '💾 Save' : '✏️ Edit'}
+          {isSaving ? 'Saving...' : editMode ? '💾 Save' : '✏️ Edit'}
         </button>
       </div>
 

@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS completion_certificates (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    certificateID TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    serialNumber VARCHAR(100) NOT NULL,
+    completionType VARCHAR(100) NOT NULL DEFAULT '',
+    certificateTitle VARCHAR(255) NOT NULL,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_completion_certificates_serialNumber (serialNumber)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
