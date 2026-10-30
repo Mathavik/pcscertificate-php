@@ -110,6 +110,13 @@ Upon successful completion, you will receive an {{internship Completion Title}} 
 Warm regards,
 
 **FOR PCS SOFTWARE SOLUTIONS**`
+  },
+  {
+    ...defaultFields,
+    certificateTitle: 'CERTIFICATE COMPLETION',
+    certificateContent: `This is to certify that {{student Name}}, a student of {{college Name}} in {{department}}, has successfully completed the "{{internship Title}}" at PCS Software Solutions from {{from Date}} to {{to Date}}. During this period, the student demonstrated dedication, professionalism, and a strong willingness to learn.`,
+    wishMessage: "We wish the student all the best in all future endeavours.",
+    showQrCode: true,
   }
 ];
 
@@ -134,16 +141,16 @@ type CertificateContextValue = {
 const CertificateContext = createContext<CertificateContextValue | undefined>(undefined);
 
 export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [qrCodes, setQrCodes] = useState<string[]>(['', '', '']);
-  const [serialNumbers, setSerialNumbers] = useState<string[]>(['', '', '']);
+  const [qrCodes, setQrCodes] = useState<string[]>(['', '', '', '']);
+  const [serialNumbers, setSerialNumbers] = useState<string[]>(['', '', '', '']);
   const [pagesData, setPagesData] = useState<CertificateFields[]>(defaultPages);
   const [adminCertificates, setAdminCertificates] = useState<SavedCertificate[]>([]);
   const [certificateStats, setCertificateStats] = useState<Array<{ certificateTitle: string; count: number }>>([]);
   const [saveStatus, setSaveStatus] = useState<string>("");
-  const [currentCertificateIds, setCurrentCertificateIds] = useState<Array<number | undefined>>([undefined, undefined, undefined]);
+  const [currentCertificateIds, setCurrentCertificateIds] = useState<Array<number | undefined>>([undefined, undefined, undefined, undefined]);
   const [loadedCertificateId, setLoadedCertificateId] = useState<number | undefined>(undefined);
-  const loadedSnapshot = useRef<Array<CertificateFields | null>>([null, null, null]);
-  const [reviewName, setReviewName] = useState<string[]>([defaultFields.studentName, defaultFields.studentName, defaultFields.studentName]);
+  const loadedSnapshot = useRef<Array<CertificateFields | null>>([null, null, null, null]);
+  const [reviewName, setReviewName] = useState<string[]>([defaultFields.studentName, defaultFields.studentName, defaultFields.studentName, defaultFields.studentName]);
   const pendingScrollRef = useRef<number | null>(null);
 
   const parseContent = (content: string, page: CertificateFields) => {
@@ -218,7 +225,7 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
       // Update QR codes
       setQrCodes((prev) => {
         const copy = [...prev];
-        if (index === 1) {
+        if (index === 1 || index === 3) {
           copy[index] = saved.qrCode || '';
         } else if (index === 0) {
           copy[index] = isEdit ? (saved.qrCode || '') : '';
@@ -282,9 +289,9 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
     if (loadedCertificateId !== undefined && loadedCertificateId !== c.id) {
       // Clear all pages back to defaults
       setPagesData(defaultPages);
-      setCurrentCertificateIds([undefined, undefined, undefined]);
-      loadedSnapshot.current = [null, null, null];
-      setReviewName([defaultFields.studentName, defaultFields.studentName, defaultFields.studentName]);
+      setCurrentCertificateIds([undefined, undefined, undefined, undefined]);
+      loadedSnapshot.current = [null, null, null, null];
+      setReviewName([defaultFields.studentName, defaultFields.studentName, defaultFields.studentName, defaultFields.studentName]);
     }
 
     // Map certificate type to editor page index
@@ -292,6 +299,7 @@ export const CertificateProvider: React.FC<{ children: ReactNode }> = ({ childre
     const title = (c.certificateTitle || "").toUpperCase();
     if (title.includes("ACCEPTANCE")) pageIndex = 2;
     else if (title.includes("INTERNSHIP") || title.includes("PROJECT")) pageIndex = 1;
+    else if (title.includes("COMPLETION")) pageIndex = 3;
     else if (title.includes("ATTENDANCE")) pageIndex = 0;
 
     const loadedFields: CertificateFields = {

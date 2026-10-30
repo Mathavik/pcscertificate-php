@@ -886,9 +886,6 @@ const CertificateGenerator: React.FC = () => {
                 </div>
                 <div className="flex flex-col items-end mt-16">
                   <div className="pr-4 text-center">
-                    {pagesData[0].signatureImage && (
-                      <img src={pagesData[0].signatureImage} alt="signature" className="w-32 h-auto mb-2 mx-auto" />
-                    )}
                     <p className="text-[15px] font-bold uppercase">{pagesData[0].signatoryTitle}</p>
                   </div>
                 </div>
@@ -968,9 +965,6 @@ const CertificateGenerator: React.FC = () => {
                 </div>
                 <div className="flex flex-col items-end mt-16">
                   <div className="pr-4 text-center">
-                    {pagesData[1].signatureImage && (
-                      <img src={pagesData[1].signatureImage} alt="signature" className="w-32 h-auto mb-2 mx-auto" />
-                    )}
                     <p className="text-[15px] font-bold uppercase">{pagesData[1].signatoryTitle}</p>
                   </div>
                 </div>
@@ -1040,9 +1034,6 @@ const CertificateGenerator: React.FC = () => {
                 </div>
                 <div className="flex flex-col items-start mt-6">
                   <div className="text-left">
-                    {pagesData[2].signatureImage && (
-                      <img src={pagesData[2].signatureImage} alt="signature" className="w-32 h-auto mb-2" />
-                    )}
                     <p className="text-[14px] mt-2 font-bold">Mahalakshmi Ganesan</p>
                     <p className="text-[13px]">Director</p>
                   </div>
@@ -1091,4 +1082,3 @@ const CertificateGenerator: React.FC = () => {
 };
 
 export default CertificateGenerator;
-

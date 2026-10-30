@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import CertificateManager from './CertificateManager';
 import { useCerts } from './CertificateContext';
 
-const PAGE_ROUTES = ['/certificates/attendance', '/certificates/internship', '/certificates/acceptance'];
+const PAGE_ROUTES = [
+  '/certificates/attendance',
+  '/certificates/internship',
+  '/certificates/acceptance',
+  '/certificates/completion',
+];
 
 const CertificateManagerPage: React.FC = () => {
   const navigate = useNavigate();

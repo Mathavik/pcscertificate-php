@@ -11,6 +11,7 @@ import DashboardOverview from "./admin/DashboardOverview";
 import CollegeCertificates from "./admin/CollegeCertificates";
 import AttendanceCertificate from "./admin/AttendanceCertificate";
 import InternshipCertificate from "./admin/InternshipCertificate";
+import CompletionCertificate from "./admin/CompletionCertificate";
 import AcceptanceCertificate from "./admin/AcceptanceCertificate";
 import CertificateManagerPage from "./admin/CertificateManagerPage";
 import { clearAuthSession, getAuthToken, getAuthUser, isAuthSessionExpired } from "./auth";
@@ -57,6 +58,7 @@ function App() {
           <Route path="dashboard" element={<DashboardOverview />} />
           <Route path="certificates/attendance" element={<AttendanceCertificate />} />
           <Route path="certificates/internship" element={<InternshipCertificate />} />
+          <Route path="certificates/completion" element={<CompletionCertificate />} />
           <Route path="certificates/acceptance" element={<AcceptanceCertificate />} />
           <Route path="certificates/manager" element={<CertificateManagerPage />} />
           <Route path="colleges" element={<CollegeCertificates />} />
@@ -67,6 +69,7 @@ function App() {
         <Route path="/admin/dashboard" element={<Navigate to="/dashboard" replace />} />
         <Route path="/admin/certificates/attendance" element={<Navigate to="/certificates/attendance" replace />} />
         <Route path="/admin/certificates/internship" element={<Navigate to="/certificates/internship" replace />} />
+        <Route path="/admin/certificates/completion" element={<Navigate to="/certificates/completion" replace />} />
         <Route path="/admin/certificates/acceptance" element={<Navigate to="/certificates/acceptance" replace />} />
         <Route path="/admin/certificates/manager" element={<Navigate to="/certificates/manager" replace />} />
         <Route path="/admin/colleges" element={<Navigate to="/colleges" replace />} />
