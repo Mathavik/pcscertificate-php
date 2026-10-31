@@ -5,14 +5,41 @@ import toast from 'react-hot-toast';
 type CertificateManagerProps = {
   certificateStats: Array<{ certificateTitle: string; count: number }>;
   adminCertificates: SavedCertificate[];
+  completionCertificates?: Array<{
+    id: number;
+    certificateID: number;
+    serialNumber: string;
+    completionType: string;
+    certificateTitle: string;
+    createdAt: string;
+  }>;
   saveStatus: string;
-  onLoadSaved: () => void;
+  onLoadSaved: () => void | Promise<void>;
   onLoadIntoEditor: (c: SavedCertificate) => void;
 };
+
+type CertificateManagerEntry = {
+  id: number;
+  source: 'certificate' | 'completion';
+  certificateTitle: string;
+  studentName?: string;
+  collegeName?: string;
+  fromDate?: string;
+  toDate?: string;
+  date?: string;
+  serialNumber?: string;
+  completionType?: string;
+  certificateID?: number;
+  certificate?: SavedCertificate;
+};
+
+const isCompletionCertificate = (title: string) =>
+  title.trim().toUpperCase().startsWith('CERTIFICATE COMPLETION');
 
 const CertificateManager: React.FC<CertificateManagerProps> = ({
   certificateStats,
   adminCertificates,
+  completionCertificates = [],
   saveStatus,
   onLoadSaved,
   onLoadIntoEditor,
@@ -31,9 +58,34 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
+  const managerEntries: CertificateManagerEntry[] = [
+    ...adminCertificates
+      .filter((certificate) => !isCompletionCertificate(certificate.certificateTitle))
+      .map((certificate) => ({
+        id: certificate.id || 0,
+        source: 'certificate' as const,
+        certificateTitle: certificate.certificateTitle,
+        studentName: certificate.studentName,
+        collegeName: certificate.collegeName,
+        fromDate: certificate.fromDate,
+        toDate: certificate.toDate,
+        date: certificate.date,
+        certificate,
+      })),
+    ...completionCertificates.map((certificate) => ({
+      id: certificate.id,
+      source: 'completion' as const,
+      certificateTitle: certificate.certificateTitle,
+      date: certificate.createdAt?.slice(0, 10) || '',
+      serialNumber: certificate.serialNumber,
+      completionType: certificate.completionType,
+      certificateID: certificate.certificateID,
+    })),
+  ];
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedTitle, selectedYear, selectedMonth, searchQuery]);
+  }, [selectedTitle, selectedYear, selectedMonth, searchQuery, completionCertificates.length]);
 
   const formatDateForDisplay = (dateStr: string): string => {
     if (!dateStr) return '';
@@ -44,7 +96,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     return dateStr;
   };
 
-  const parseCertDate = (raw: string): { day: string; month: string; year: string } | null => {
+  const parseCertDate = (raw?: string): { day: string; month: string; year: string } | null => {
     if (!raw) return null;
     // Support DD.MM.YYYY
     const dotParts = raw.split('.');
@@ -69,7 +121,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
 
   const availableYears = Array.from(
     new Set(
-      adminCertificates
+      managerEntries
         .map((c) => {
           const parsed = parseCertDate(c.date);
           return parsed ? parsed.year : null;
@@ -94,9 +146,12 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   ];
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
+  const isCompletionTitleSelected = selectedTitle
+    ? isCompletionCertificate(selectedTitle)
+    : false;
 
-  const filteredCertificates = adminCertificates.filter((c) => {
-    if (c.certificateTitle === 'ATTENDANCE CERTIFICATE') return false;
+  const filteredCertificates = managerEntries.filter((c) => {
+    if (c.source === 'certificate' && c.certificateTitle === 'ATTENDANCE CERTIFICATE') return false;
 
     const matchesTitle = selectedTitle ? c.certificateTitle === selectedTitle : true;
 
@@ -107,7 +162,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
 
     // Case-insensitive partial match on student name
     const matchesSearch = normalizedQuery
-      ? String(c.studentName ?? '').toLowerCase().includes(normalizedQuery)
+      ? `${c.studentName ?? ''} ${c.serialNumber ?? ''}`.toLowerCase().includes(normalizedQuery)
       : true;
 
     return matchesTitle && matchesYear && matchesMonth && matchesSearch;
@@ -144,10 +199,21 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
         </div>
       </div>
  {/* Certificate Stats */}
-      {certificateStats.length > 0 && (
+      {(certificateStats.length > 0 || completionCertificates.length > 0) && (
         <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {certificateStats
-            .filter((stat) => stat.certificateTitle !== 'ATTENDANCE CERTIFICATE') 
+          {[
+            ...certificateStats.filter(
+              (stat) =>
+                stat.certificateTitle !== 'ATTENDANCE CERTIFICATE' &&
+                !isCompletionCertificate(stat.certificateTitle)
+            ),
+            ...(completionCertificates.length > 0
+              ? [{
+                  certificateTitle: 'CERTIFICATE COMPLETION',
+                  count: completionCertificates.length,
+                }]
+              : []),
+          ]
             .map((stat) => (
               <div
                 key={stat.certificateTitle}
@@ -338,34 +404,50 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
           <table className="min-w-full text-sm">
             <thead className="bg-slate-100 text-slate-800">
               <tr>
-                <th className="px-3 py-2 text-left font-semibold">ID</th>
-                <th className="px-3 py-2 text-left font-semibold">Student</th>
-                <th className="px-3 py-2 text-left font-semibold">College</th>
+                <th className="px-3 py-2 text-left font-semibold">certificateID</th>
+                <th className="px-3 py-2 text-left font-semibold">Student / Serial No</th>
+                <th className="px-3 py-2 text-left font-semibold">College / Type</th>
                 <th className="px-3 py-2 text-left font-semibold">Certificate</th>
-                <th className="px-3 py-2 text-left font-semibold">From</th>
-                <th className="px-3 py-2 text-left font-semibold">To</th>
+                {!isCompletionTitleSelected && (
+                  <>
+                    <th className="px-3 py-2 text-left font-semibold">From</th>
+                    <th className="px-3 py-2 text-left font-semibold">To</th>
+                  </>
+                )}
                 <th className="px-3 py-2 text-left font-semibold">Date</th>
-                <th className="px-3 py-2 text-left font-semibold">Actions</th>
+                {!isCompletionTitleSelected && (
+                  <th className="px-3 py-2 text-left font-semibold">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white">
               {paginatedCertificates.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50 border-b border-slate-100 last:border-0">
-                  <td className="px-3 py-2">{c.id}</td>
-                  <td className="px-3 py-2">{c.studentName}</td>
-                  <td className="px-3 py-2">{c.collegeName}</td>
+                <tr key={`${c.source}-${c.id}`} className="hover:bg-slate-50 border-b border-slate-100 last:border-0">
+                  <td className="px-3 py-2">{c.source === 'completion' ? `${c.certificateID}` : c.certificateID}</td>
+                  <td className="px-3 py-2">{c.source === 'completion' ? c.serialNumber : c.studentName}</td>
+                  <td className="px-3 py-2">{c.source === 'completion' ? c.completionType : c.collegeName}</td>
                   <td className="px-3 py-2">{c.certificateTitle}</td>
-                  <td className="px-3 py-2">{formatDateForDisplay(c.fromDate)}</td>
-                  <td className="px-3 py-2">{formatDateForDisplay(c.toDate)}</td>
-                  <td className="px-3 py-2 font-medium text-slate-600">{formatDateForDisplay(c.date)}</td>
-                  <td className="px-3 py-2">
-                    <button 
-                      onClick={() => handleLoadClick(c)} 
-                      className="text-xs bg-emerald-600 hover:bg-emerald-700 transition-colors text-white px-2 py-1 rounded"
-                    >
-                      Load
-                    </button>
-                  </td>
+                  {!isCompletionTitleSelected && (
+                    <>
+                      <td className="px-3 py-2">{formatDateForDisplay(c.fromDate || '')}</td>
+                      <td className="px-3 py-2">{formatDateForDisplay(c.toDate || '')}</td>
+                    </>
+                  )}
+                  <td className="px-3 py-2 font-medium text-slate-600">{formatDateForDisplay(c.date || '')}</td>
+                  {!isCompletionTitleSelected && (
+                    <td className="px-3 py-2">
+                      {c.source === 'certificate' && c.certificate && (
+                        <button
+                          onClick={() => {
+                            if (c.certificate) handleLoadClick(c.certificate);
+                          }}
+                          className="text-xs bg-emerald-600 hover:bg-emerald-700 transition-colors text-white px-2 py-1 rounded"
+                        >
+                          Load
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

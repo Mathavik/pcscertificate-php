@@ -12,6 +12,15 @@ class Certificate
         $this->pdo = $pdo;
     }
 
+    private function ensureNotCompletionCertificate($title)
+    {
+        if (stripos(trim((string)$title), 'CERTIFICATE COMPLETION') === 0) {
+            throw new InvalidArgumentException(
+                'Completion certificates must be saved through completion_certificates.'
+            );
+        }
+    }
+
     /**
      * Helper to cast boolean fields to integer (0/1)
      */
@@ -34,6 +43,8 @@ class Certificate
     // Create a new certificate
     public function create($data)
     {
+        $this->ensureNotCompletionCertificate($data['certificateTitle'] ?? '');
+
         // ✅ Cast boolean fields
         $this->castBooleans($data);
 
@@ -79,6 +90,11 @@ class Certificate
     // Update certificate by id (do not allow serialNumber or qrCode update)
     public function update($id, $data)
     {
+        $existing = $this->findById($id);
+        $this->ensureNotCompletionCertificate(
+            $data['certificateTitle'] ?? ($existing['certificateTitle'] ?? '')
+        );
+
         unset($data['serialNumber'], $data['qrCode']); // prevent override
 
         // ✅ Cast boolean fields

@@ -43,11 +43,27 @@ if (!$existing) {
     exit;
 }
 
+if (
+    stripos(
+        trim((string)($input['certificateTitle'] ?? $existing['certificateTitle'] ?? '')),
+        'CERTIFICATE COMPLETION'
+    ) === 0
+) {
+    http_response_code(422);
+    echo json_encode([
+        'message' => 'Completion certificates must be saved through completion_certificates.php.',
+    ]);
+    exit;
+}
+
 try {
     unset($input['serialNumber'], $input['qrCode']); // prevent override
     $certModel->update($id, $input);
     $updated = $certModel->findById($id);
     echo json_encode($updated);
+} catch (InvalidArgumentException $e) {
+    http_response_code(422);
+    echo json_encode(['message' => $e->getMessage()]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['message' => 'Unable to update certificate.', 'error' => $e->getMessage()]);

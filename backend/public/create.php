@@ -43,6 +43,14 @@ if (!empty($missing)) {
     exit;
 }
 
+if (stripos(trim((string)$input['certificateTitle']), 'CERTIFICATE COMPLETION') === 0) {
+    http_response_code(422);
+    echo json_encode([
+        'message' => 'Completion certificates must be saved through completion_certificates.php.',
+    ]);
+    exit;
+}
+
 $pdo = $GLOBALS['pdo'];
 $certModel = new Certificate($pdo);
 
@@ -76,6 +84,9 @@ try {
         'message' => 'Database error while creating certificate.',
         'error'   => $e->getMessage()
     ]);
+} catch (InvalidArgumentException $e) {
+    http_response_code(422);
+    echo json_encode(['message' => $e->getMessage()]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
