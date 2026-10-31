@@ -155,15 +155,15 @@ const CompletionCertificate: React.FC = () => {
 
   const Watermark = () => (
     <img
-      src="/images/android-chrome-192x192.png"
-      alt="watermark"
+      src="/document/PNG/PCS-Icon-Watermark.png"
+      alt=""
+      aria-hidden="true"
       style={{
         position: 'absolute',
-        top: '50%',
+        top: '60%',
         left: '50%',
-        width: '320px',
+        width: '50%',
         transform: 'translate(-50%, -50%)',
-        opacity: 0.05,
         pointerEvents: 'none',
         userSelect: 'none',
         zIndex: 1,
@@ -272,7 +272,178 @@ const CompletionCertificate: React.FC = () => {
                     }}
                   >
                     <Watermark />
+                    <img
+                      src="/document/PNG/PCS-Logo-WT.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '2%',
+                        left: '69%',
+                        width: '28%',
+                        height: '14%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                        zIndex: 2,
+                      }}
+                    />
+                    <div
+                      className="absolute z-10 text-right text-[12px] font-semibold text-white"
+                      style={{
+                        top: '12%',
+                        right: '3.5%',
+                        width: '20%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      Progress. Connect. Succeed.
+                    </div>
+                    <img
+                      src="/document/PNG/PCS-Ribbon-Banner.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '38%',
+                        left: '20%',
+                        width: '50%',
+                        height: '7%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                        zIndex: 2,
+                      }}
+                    />
+                    <img
+                      src="/document/PNG/PCS-R-Badge.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '16%',
+                        left: '78%',
+                        width: '17%',
+                        height: '50%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                        zIndex: 2,
+                      }}
+                    />
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 100 100"
+                      style={{
+                        position: 'absolute',
+                        top: '47.5%',
+                        left: '86.5%',
+                        width: '9%',
+                        height: 'auto',
+                        transform: 'translate(-50%, -50%)',
+                        overflow: 'visible',
+                        pointerEvents: 'none',
+                        zIndex: 3,
+                      }}
+                    >
+                      <defs>
+                        <path id="completion-badge-top" d="M 12,50 A 38,38 0 0,0 88,50" />
+                        <path id="completion-badge-bottom" d="M 12,50 A 38,38 0 0,1 88,50" />
+                      </defs>
+                      <text
+                        fill="#ffffff"
+                        fontFamily="Arial, sans-serif"
+                        fontSize="8"
+                        fontWeight="bold"
+                        letterSpacing="0.5"
+                      >
+                        <textPath href="#completion-badge-top" startOffset="50%" textAnchor="middle">
+                          EXCELLENCE IN
+                        </textPath>
+                      </text>
+                      <text
+                        fill="#ffffff"
+                        fontFamily="Arial, sans-serif"
+                        fontSize="8"
+                        fontWeight="bold"
+                        letterSpacing="0.5"
+                      >
+                        <textPath href="#completion-badge-bottom" startOffset="50%" textAnchor="middle">
+                          PROGRAMMING
+                        </textPath>
+                      </text>
+                    </svg>
+                    <img
+                      src="/document/PNG/PCS-Icon.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '47.5%',
+                        left: '86.5%',
+                        width: '4.3%',
+                        height: '6.5%',
+                        objectFit: 'contain',
+                        transform: 'translate(-50%, -50%)',
+                        pointerEvents: 'none',
+                        zIndex: 4,
+                      }}
+                    />
+                    <img
+                      src="/document/PNG/PCS-Location-Icon.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '72%',
+                        left: '81.5%',
+                        width: '1.2%',
+                        height: '2%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                        zIndex: 2,
+                      }}
+                    />
+                    <img
+                      src="/document/PNG/PCS-Mail-Icon.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '78.5%',
+                        left: '81.5%',
+                        width: '1.2%',
+                        height: '2%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                        zIndex: 2,
+                      }}
+                    />
+                    <img
+                      src="/document/PNG/PCS-Website-Icon.png"
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '84.5%',
+                        left: '81.5%',
+                        width: '1.2%',
+                        height: '2%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                        zIndex: 2,
+                      }}
+                    />
 
+                    <div
+                      className="absolute z-10 text-center font-extrabold leading-none text-[#211d5b]"
+                      style={{
+                        top: '18%',
+                        left: '14%',
+                        width: '62%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      <div style={{ fontSize: '50px' }}>CERTIFICATE</div>
+                      <div style={{ marginTop: '3px', fontSize: '32px' }}>OF COMPLETION</div>
+                    </div>
                     <div
                       className="absolute left-[45%] top-[34.5%] z-10 -translate-x-1/2 whitespace-nowrap text-center text-[18px] font-bold text-[#211d5b]"
                       style={{ fontFamily: "'WF Visual Sans', sans-serif" }}
@@ -280,6 +451,32 @@ const CompletionCertificate: React.FC = () => {
                       Certificate No: {completionOptions.certificateNumber}
                     </div>
 
+                    <div
+                      className="absolute z-10 text-center text-[20px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '39.3%',
+                        left: '20%',
+                        width: '50%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      This Certificate is Proudly Presented to
+                    </div>
+                    <div
+                      className="absolute z-10 border-b-2 border-[#211d5b]"
+                      style={{ top: '53%', left: '15%', width: '57%' }}
+                    />
+                    <div
+                      className="absolute z-10 text-center text-[16px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '54.3%',
+                        left: '15%',
+                        width: '57%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      for successfully completing the
+                    </div>
                     <div
                       className="absolute left-[45%] top-[60%] z-10 flex -translate-x-1/2 justify-center gap-5 whitespace-nowrap text-[22px] font-bold uppercase text-[#211d5b]"
                       style={{ fontFamily: "'WF Visual Sans', sans-serif" }}
@@ -295,6 +492,159 @@ const CompletionCertificate: React.FC = () => {
                           </span>
                         );
                       })}
+                    </div>
+                    <div
+                      className="absolute z-10 text-[16px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '67%',
+                        left: '15%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      on
+                    </div>
+                    <div
+                      className="absolute z-10 border-b-2 border-[#211d5b] text-center text-[15px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '66.6%',
+                        left: '19%',
+                        width: '53%',
+                        minHeight: '22px',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    />
+                    <div
+                      className="absolute z-10 flex text-[15px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '71.2%',
+                        left: '20%',
+                        width: '50%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      <div className="flex w-1/2 items-end gap-2">
+                        <span>from</span>
+                        <span className="flex-1 border-b-2 border-[#211d5b] text-center" />
+                      </div>
+                      <div className="ml-6 flex w-1/2 items-end gap-2">
+                        <span>to</span>
+                        <span className="flex-1 border-b-2 border-[#211d5b] text-center" />
+                      </div>
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[14px] font-semibold leading-[1.45] text-[#211d5b]"
+                      style={{
+                        top: '76.5%',
+                        left: '14%',
+                        width: '60%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      <div>
+                        During the session the performance of the candidate was found to be good.
+                      </div>
+                      <div>
+                        We congratulate them on this accomplishment and wish them continued
+                      </div>
+                      <div>success in their future endeavors.</div>
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
+                      style={{
+                        top: '69.5%',
+                        left: '83%',
+                        width: '14%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      PLACE..
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[14px] font-semibold text-black"
+                      style={{
+                        top: '71.2%',
+                        left: '83%',
+                        width: '14%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      Surandai
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
+                      style={{
+                        top: '76%',
+                        left: '83%',
+                        width: '14%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      CONNECT..
+                    </div>
+                    <div
+                      className="absolute z-10 whitespace-nowrap text-center text-[13px] font-semibold text-black"
+                      style={{
+                        top: '77.7%',
+                        left: '83%',
+                        width: '16%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      contact@pcstech.in
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
+                      style={{
+                        top: '82%',
+                        left: '83%',
+                        width: '14%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      SEARCH..
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[13px] font-semibold text-black"
+                      style={{
+                        top: '83.7%',
+                        left: '83%',
+                        width: '14%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      www.pcstech.in
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[10px] font-semibold text-black"
+                      style={{
+                        top: '86%',
+                        left: '83%',
+                        width: '15%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      /f pcstechsurandai
+                    </div>
+                    <div
+                      className="absolute z-10 text-[14px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '94%',
+                        left: '15%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      Date Of Issue
+                    </div>
+                    <div
+                      className="absolute z-10 text-center text-[14px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '94%',
+                        left: '57%',
+                        width: '20%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      Authorized Signatory
                     </div>
 
                   </section>
