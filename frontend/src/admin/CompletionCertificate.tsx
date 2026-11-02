@@ -161,8 +161,8 @@ const CompletionCertificate: React.FC = () => {
       style={{
         position: 'absolute',
         top: '60%',
-        left: '50%',
-        width: '50%',
+        left: '48%',
+        width: '45%',
         transform: 'translate(-50%, -50%)',
         pointerEvents: 'none',
         userSelect: 'none',
@@ -278,7 +278,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '2%',
+                        top: '1.5%',
                         left: '69%',
                         width: '28%',
                         height: '14%',
@@ -290,11 +290,11 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-[3] whitespace-nowrap text-right text-white"
                       style={{
-                        top: '14%',
-                        left: '79%',
+                        top: '13.5%',
+                        left: '80%',
                         width: '17%',
                         fontFamily: 'Arial, sans-serif',
-                        fontSize: '12px',
+                        fontSize: '15px',
                       }}
                     >
                       Progress. Connect. Succeed.
@@ -320,7 +320,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '17%',
+                        top: '16.8%',
                         left: '78%',
                         width: '17%',
                         height: '50%',
@@ -442,11 +442,11 @@ const CompletionCertificate: React.FC = () => {
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
                     >
-                      <div style={{ fontSize: '50px' }}>CERTIFICATE</div>
-                      <div style={{ marginTop: '3px', fontSize: '32px' }}>OF COMPLETION</div>
+                      <div style={{ fontSize: '72px' }}>CERTIFICATE</div>
+                      <div style={{ marginTop: '3px', fontSize: '42px' }}>OF COMPLETION</div>
                     </div>
                     <div
-                      className="absolute left-[45%] top-[34.5%] z-10 -translate-x-1/2 whitespace-nowrap text-center text-[18px] font-bold text-[#211d5b]"
+                      className="absolute left-[45%] top-[34%] z-10 -translate-x-1/2 whitespace-nowrap text-center text-[18px] font-bold text-[#211d5b]"
                       style={{ fontFamily: "'WF Visual Sans', sans-serif" }}
                     >
                       Certificate No: {completionOptions.certificateNumber}
