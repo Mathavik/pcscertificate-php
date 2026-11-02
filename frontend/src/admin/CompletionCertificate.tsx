@@ -288,12 +288,13 @@ const CompletionCertificate: React.FC = () => {
                       }}
                     />
                     <div
-                      className="absolute z-10 text-right text-[12px] font-semibold text-white"
+                      className="absolute z-[3] whitespace-nowrap text-right text-white"
                       style={{
-                        top: '12%',
-                        right: '3.5%',
-                        width: '20%',
-                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                        top: '14%',
+                        left: '79%',
+                        width: '17%',
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: '12px',
                       }}
                     >
                       Progress. Connect. Succeed.
@@ -319,7 +320,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '16%',
+                        top: '17%',
                         left: '78%',
                         width: '17%',
                         height: '50%',
@@ -333,7 +334,7 @@ const CompletionCertificate: React.FC = () => {
                       viewBox="0 0 100 100"
                       style={{
                         position: 'absolute',
-                        top: '47.5%',
+                        top: '48.5%',
                         left: '86.5%',
                         width: '9%',
                         height: 'auto',
@@ -376,7 +377,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '47.5%',
+                        top: '48.5%',
                         left: '86.5%',
                         width: '4.3%',
                         height: '6.5%',
