@@ -160,9 +160,9 @@ const CompletionCertificate: React.FC = () => {
       aria-hidden="true"
       style={{
         position: 'absolute',
-        top: '60%',
-        left: '48%',
-        width: '45%',
+        top: '56%',
+        left: '45%',
+        width: '35%',
         transform: 'translate(-50%, -50%)',
         pointerEvents: 'none',
         userSelect: 'none',
