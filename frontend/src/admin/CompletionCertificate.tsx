@@ -393,9 +393,9 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '72%',
-                        left: '81.5%',
-                        width: '1.2%',
+                        top: '71.6%',
+                        left: '80%',
+                        width: '0.8%',
                         height: '2%',
                         objectFit: 'contain',
                         pointerEvents: 'none',
@@ -408,9 +408,9 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '78.5%',
-                        left: '81.5%',
-                        width: '1.2%',
+                        top: '77.8%',
+                        left: '80%',
+                        width: '0.8%',
                         height: '2%',
                         objectFit: 'contain',
                         pointerEvents: 'none',
@@ -423,9 +423,9 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '84.5%',
-                        left: '81.5%',
-                        width: '1.2%',
+                        top: '84%',
+                        left: '80%',
+                        width: '0.8%',
                         height: '2%',
                         objectFit: 'contain',
                         pointerEvents: 'none',
@@ -552,8 +552,8 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
                       style={{
-                        top: '69.5%',
-                        left: '83%',
+                        top: '70%',
+                        left: '77%',
                         width: '14%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -563,8 +563,8 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 text-center text-[14px] font-semibold text-black"
                       style={{
-                        top: '71.2%',
-                        left: '83%',
+                        top: '71.5%',
+                        left: '77.2%',
                         width: '14%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -575,7 +575,7 @@ const CompletionCertificate: React.FC = () => {
                       className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
                       style={{
                         top: '76%',
-                        left: '83%',
+                        left: '77.7%',
                         width: '14%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -586,18 +586,18 @@ const CompletionCertificate: React.FC = () => {
                       className="absolute z-10 whitespace-nowrap text-center text-[13px] font-semibold text-black"
                       style={{
                         top: '77.7%',
-                        left: '83%',
+                        left: '79.1%',
                         width: '16%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
                     >
-                      contact@pcstech.in
+                      Contact@pcstech.in
                     </div>
                     <div
                       className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
                       style={{
                         top: '82%',
-                        left: '83%',
+                        left: '77.5%',
                         width: '14%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -608,7 +608,7 @@ const CompletionCertificate: React.FC = () => {
                       className="absolute z-10 text-center text-[13px] font-semibold text-black"
                       style={{
                         top: '83.7%',
-                        left: '83%',
+                        left: '79%',
                         width: '14%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -619,7 +619,7 @@ const CompletionCertificate: React.FC = () => {
                       className="absolute z-10 text-center text-[10px] font-semibold text-black"
                       style={{
                         top: '86%',
-                        left: '83%',
+                        left: '78%',
                         width: '15%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -629,7 +629,7 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 text-[14px] font-bold text-[#211d5b]"
                       style={{
-                        top: '94%',
+                        top: '91%',
                         left: '15%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -639,7 +639,7 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 text-center text-[14px] font-bold text-[#211d5b]"
                       style={{
-                        top: '94%',
+                        top: '91%',
                         left: '57%',
                         width: '20%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
