@@ -52,7 +52,6 @@ const writeCompletionOptions = (content: string, options: CompletionOptions) => 
 const CompletionCertificate: React.FC = () => {
   const {
     pagesData,
-    reviewName,
     pendingScrollRef,
     handleChange,
   } = useCerts();
@@ -115,18 +114,7 @@ const CompletionCertificate: React.FC = () => {
     }
   }, [index, pendingScrollRef]);
 
-  // Keeps only characters that are safe for a file name
-  const sanitizeFileName = (value: string) =>
-    (value || '')
-      .replace(/[\\/:*?"<>|]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-  const buildPdfFileName = () => {
-    const title = sanitizeFileName(page?.certificateTitle) || PAGE_LABEL;
-    const student = sanitizeFileName(reviewName[index]) || sanitizeFileName(page?.studentName);
-    return student ? `${title}_${student}.pdf` : `${title}.pdf`;
-  };
+  const buildPdfFileName = () => `${PAGE_LABEL}.pdf`;
 
   // Waits until fonts and every <img> inside the certificate are fully loaded,
   // so the capture never happens with half-loaded assets.
@@ -188,6 +176,12 @@ const CompletionCertificate: React.FC = () => {
       scrollY: -window.scrollY,
       onclone: (doc) => {
         const cloned = doc.querySelector('[data-certificate-root="true"]') as HTMLElement | null;
+        doc.querySelectorAll('[data-gradient-text="true"]').forEach((node) => {
+          const el = node as HTMLElement;
+          el.style.backgroundImage = 'none';
+          el.style.webkitTextFillColor = '#7a206c';
+          el.style.color = '#7a206c';
+        });
         if (cloned) {
           cloned.style.boxShadow = 'none';
           cloned.style.width = `${CERT_WIDTH}px`;
@@ -521,7 +515,22 @@ const CompletionCertificate: React.FC = () => {
                       }}
                     >
                       <div style={{ fontSize: '72px' }}>CERTIFICATE</div>
-                      <div style={{ marginTop: '3px', fontSize: '42px' }}>OF COMPLETION</div>
+                      <div style={{ marginTop: '3px', fontSize: '42px' }}>
+                        <span
+                          data-gradient-text="true"
+                          style={{
+                            display: 'inline-block',
+                            backgroundImage:
+                              'linear-gradient(90deg, #2b1f62 0%, #4a2067 30%, #6f206b 55%, #8f206d 78%, #ab2070 100%)',
+                            WebkitBackgroundClip: 'text',
+                            backgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            color: 'transparent',
+                          }}
+                        >
+                          OF COMPLETION
+                        </span>
+                      </div>
                     </div>
                     <div
                       className="absolute left-[45%] top-[34%] z-10 -translate-x-1/2 whitespace-nowrap text-center text-[18px] font-bold text-[#211d5b]"
