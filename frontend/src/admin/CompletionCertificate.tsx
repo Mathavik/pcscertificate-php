@@ -15,6 +15,11 @@ const CERTIFICATE_BACKGROUND = "url('/document/PCS-Certificate-NOV26-RGB.jpeg')"
 const COMPLETION_TYPES = ['Internship', 'Course', 'Project'] as const;
 const DEFAULT_CERTIFICATE_NUMBER = 'PCS-COC-26-27/';
 const CERT_WIDTH = 1123;
+// Badge overlay: centre of the round badge inside PCS-R-Badge.png, and overlay size.
+// Move BADGE_CENTER_X / BADGE_CENTER_Y if the text ring is not exactly concentric with the badge.
+const BADGE_CENTER_X = '86.5%';
+const BADGE_CENTER_Y = '48.5%';
+const BADGE_SVG_WIDTH = '17.9%';
 const CERT_HEIGHT = 794;
 const COMPLETION_OPTIONS_PATTERN = /<!--completionCertificateOptions:([\s\S]*?)-->/;
 
@@ -65,6 +70,9 @@ const CompletionCertificate: React.FC = () => {
   const index = PAGE_INDEX;
   const page = pagesData[index];
   const completionOptions = readCompletionOptions(page?.certificateContent || '');
+  const [previewCompletionTypes, setPreviewCompletionTypes] = useState<string[]>(
+    () => completionOptions.completionTypes
+  );
 
   const updateCompletionOptions = (options: CompletionOptions) => {
     handleChange(index, 'certificateContent', writeCompletionOptions(page.certificateContent, options));
@@ -94,6 +102,7 @@ const CompletionCertificate: React.FC = () => {
         throw new Error(saved.message || 'Unable to save completion certificate.');
       }
 
+      setPreviewCompletionTypes(completionOptions.completionTypes);
       updateCompletionOptions({ ...completionOptions, completionTypes: [] });
       toast.success('Completion Certificate Saved!');
       return true;
@@ -324,6 +333,7 @@ const CompletionCertificate: React.FC = () => {
                     const completionTypes = e.target.checked
                       ? [...completionOptions.completionTypes, type]
                       : completionOptions.completionTypes.filter((selectedType) => selectedType !== type);
+                    setPreviewCompletionTypes(completionTypes);
                     updateCompletionOptions({ ...completionOptions, completionTypes });
                   }}
                   className="h-4 w-4"
@@ -446,15 +456,17 @@ const CompletionCertificate: React.FC = () => {
                         zIndex: 2,
                       }}
                     />
+                    {/* Badge ring text + stars. Units: 1 = 1px of the 460px reference badge. */}
                     <svg
                       aria-hidden="true"
-                      viewBox="0 0 100 100"
+                      viewBox="-230 -230 460 460"
                       style={{
                         position: 'absolute',
-                        top: '48.5%',
-                        left: '86.5%',
-                        width: '9%',
+                        top: BADGE_CENTER_Y,
+                        left: BADGE_CENTER_X,
+                        width: BADGE_SVG_WIDTH,
                         height: 'auto',
+                        aspectRatio: '1 / 1',
                         transform: 'translate(-50%, -50%)',
                         overflow: 'visible',
                         pointerEvents: 'none',
@@ -462,31 +474,45 @@ const CompletionCertificate: React.FC = () => {
                       }}
                     >
                       <defs>
-                        <path id="completion-badge-top" d="M 12,50 A 38,38 0 0,0 88,50" />
-                        <path id="completion-badge-bottom" d="M 12,50 A 38,38 0 0,1 88,50" />
+                        {/* top arc: left -> right over the top (clockwise) */}
+                        <path id="completion-badge-arc-top" d="M -119.5,0 A 119.5,119.5 0 0 1 119.5,0" />
+                        {/* bottom arc: left -> right under the bottom (counter-clockwise) */}
+                        <path id="completion-badge-arc-bottom" d="M -146.5,0 A 146.5,146.5 0 0 0 146.5,0" />
                       </defs>
                       <text
                         fill="#ffffff"
-                        fontFamily="Arial, sans-serif"
-                        fontSize="8"
-                        fontWeight="bold"
-                        letterSpacing="0.5"
+                        fontFamily="'WF Visual Sans', Arial, sans-serif"
+                        fontSize="33"
+                        fontWeight="700"
+                        textAnchor="middle"
                       >
-                        <textPath href="#completion-badge-top" startOffset="50%" textAnchor="middle">
+                        <textPath
+                          href="#completion-badge-arc-top"
+                          startOffset="50%"
+                          textLength="267"
+                          lengthAdjust="spacing"
+                        >
                           EXCELLENCE IN
                         </textPath>
                       </text>
                       <text
                         fill="#ffffff"
-                        fontFamily="Arial, sans-serif"
-                        fontSize="8"
-                        fontWeight="bold"
-                        letterSpacing="0.5"
+                        fontFamily="'WF Visual Sans', Arial, sans-serif"
+                        fontSize="33"
+                        fontWeight="700"
+                        textAnchor="middle"
                       >
-                        <textPath href="#completion-badge-bottom" startOffset="50%" textAnchor="middle">
+                        <textPath
+                          href="#completion-badge-arc-bottom"
+                          startOffset="50%"
+                          textLength="310"
+                          lengthAdjust="spacing"
+                        >
                           PROGRAMMING
                         </textPath>
                       </text>
+                      <polygon points="-128.0,-12.0 -124.6,-2.6 -114.7,-2.3 -122.6,3.8 -119.8,13.3 -128.0,7.7 -136.2,13.3 -133.4,3.8 -141.3,-2.3 -131.4,-2.6" fill="#ffb81c" />
+                      <polygon points="128.0,-12.0 131.4,-2.6 141.3,-2.3 133.4,3.8 136.2,13.3 128.0,7.7 119.8,13.3 122.6,3.8 114.7,-2.3 124.6,-2.6" fill="#ffb81c" />
                     </svg>
                     <img
                       src="/document/PNG/PCS-Icon.png"
@@ -496,8 +522,8 @@ const CompletionCertificate: React.FC = () => {
                         position: 'absolute',
                         top: '48.5%',
                         left: '86.5%',
-                        width: '4.3%',
-                        height: '6.5%',
+                        width: '5.2%',
+                        height: '7.8%',
                         objectFit: 'contain',
                         transform: 'translate(-50%, -50%)',
                         pointerEvents: 'none',
@@ -615,7 +641,7 @@ const CompletionCertificate: React.FC = () => {
                       style={{ fontFamily: "'WF Visual Sans', sans-serif" }}
                     >
                       {COMPLETION_TYPES.map((type) => {
-                        const checked = completionOptions.completionTypes.includes(type);
+                        const checked = previewCompletionTypes.includes(type);
                         return (
                           <span key={type} className="inline-flex items-center gap-3">
                             <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border-2 border-[#211d5b] text-[16px] leading-none">
