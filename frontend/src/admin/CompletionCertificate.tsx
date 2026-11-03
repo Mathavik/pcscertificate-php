@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
+import { toJpeg, toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { useCerts, CertificateFields } from './CertificateContext';
 import { authHeaders } from '../auth';
@@ -13,6 +14,8 @@ const PAGE_LABEL = 'CERTIFICATE COMPLETION';
 const CERTIFICATE_BACKGROUND = "url('/document/PCS-Certificate-NOV26-RGB.jpeg')";
 const COMPLETION_TYPES = ['Internship', 'Course', 'Project'] as const;
 const DEFAULT_CERTIFICATE_NUMBER = 'PCS-COC-26-27/';
+const CERT_WIDTH = 1123;
+const CERT_HEIGHT = 794;
 const COMPLETION_OPTIONS_PATTERN = /<!--completionCertificateOptions:([\s\S]*?)-->/;
 
 type CompletionOptions = {
@@ -125,31 +128,105 @@ const CompletionCertificate: React.FC = () => {
     return student ? `${title}_${student}.pdf` : `${title}.pdf`;
   };
 
+  // Waits until fonts and every <img> inside the certificate are fully loaded,
+  // so the capture never happens with half-loaded assets.
+  const waitForAssets = async (element: HTMLElement) => {
+    try {
+      if ((document as any).fonts?.ready) {
+        await (document as any).fonts.ready;
+      }
+    } catch {
+      /* ignore */
+    }
+    const images = Array.from(element.querySelectorAll('img'));
+    await Promise.all(
+      images.map((img) =>
+        img.complete && img.naturalWidth > 0
+          ? Promise.resolve()
+          : new Promise<void>((resolve) => {
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            })
+      )
+    );
+  };
+
+  // Primary method: html-to-image uses the browser's own renderer (SVG foreignObject),
+  // so the PDF looks exactly like the preview (object-fit, transforms, fonts, spacing).
+  const captureWithHtmlToImage = async (element: HTMLElement) => {
+    const options = {
+      width: CERT_WIDTH,
+      height: CERT_HEIGHT,
+      canvasWidth: CERT_WIDTH,
+      canvasHeight: CERT_HEIGHT,
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor: '#ffffff',
+      style: {
+        boxShadow: 'none',
+        margin: '0',
+        transform: 'none',
+        border: '1px solid transparent', // keep same box size, hide the grey border
+      },
+    };
+    // Warm-up render: makes sure fonts / background image / <img> are embedded.
+    await toPng(element, options);
+    return toJpeg(element, { ...options, quality: 0.95 });
+  };
+
+  // Fallback method: html2canvas
+  const captureWithHtml2Canvas = async (element: HTMLElement) => {
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: CERT_WIDTH,
+      height: CERT_HEIGHT,
+      windowWidth: CERT_WIDTH,
+      windowHeight: CERT_HEIGHT,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      onclone: (doc) => {
+        const cloned = doc.querySelector('[data-certificate-root="true"]') as HTMLElement | null;
+        if (cloned) {
+          cloned.style.boxShadow = 'none';
+          cloned.style.width = `${CERT_WIDTH}px`;
+          cloned.style.height = `${CERT_HEIGHT}px`;
+        }
+      },
+    });
+    return canvas.toDataURL('image/jpeg', 0.95);
+  };
+
   const downloadPDF = async () => {
     const element = pageRef.current;
     if (!element) return;
 
     try {
+      await waitForAssets(element);
+
+      let imgData: string;
+      try {
+        imgData = await captureWithHtmlToImage(element);
+      } catch (primaryError) {
+        console.warn('html-to-image failed, falling back to html2canvas:', primaryError);
+        imgData = await captureWithHtml2Canvas(element);
+      }
+
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4',
       });
 
-      const canvas = await html2canvas(element, {
-        scale: 1.5,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const imgWidth = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+      // 1123 x 794 px is the A4 landscape ratio, so the image fills the whole page.
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
       pdf.save(buildPdfFileName());
     } catch (error) {
       console.error('Error generating Certificate Completion PDF:', error);
+      toast.error('Unable to generate Certificate Completion PDF.');
     }
   };
 
@@ -259,10 +336,11 @@ const CompletionCertificate: React.FC = () => {
                 <div className="flex justify-center min-w-[1123px]">
                   <section
                     ref={pageRef}
+                    data-certificate-root="true"
                     className="relative border border-slate-300 shadow-2xl bg-white flex flex-col"
                     style={{
-                      width: '1123px',
-                      height: '794px',
+                      width: `${CERT_WIDTH}px`,
+                      height: `${CERT_HEIGHT}px`,
                       backgroundImage: CERTIFICATE_BACKGROUND,
                       backgroundSize: '100% 100%',
                       backgroundPosition: 'center',
