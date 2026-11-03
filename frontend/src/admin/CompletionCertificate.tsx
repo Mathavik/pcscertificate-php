@@ -574,7 +574,24 @@ const CompletionCertificate: React.FC = () => {
                         return (
                           <span key={type} className="inline-flex items-center gap-3">
                             <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border-2 border-[#211d5b] text-[16px] leading-none">
-                              {checked ? '✓' : ''}
+                              {checked ? (
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  width="16"
+                                  height="16"
+                                  aria-hidden="true"
+                                  style={{ display: 'block' }}
+                                >
+                                  <path
+                                    d="M4.5 12.5 L9.5 17.5 L19.5 6.5"
+                                    fill="none"
+                                    stroke="#211d5b"
+                                    strokeWidth="3.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              ) : null}
                             </span>
                             {type}
                           </span>
