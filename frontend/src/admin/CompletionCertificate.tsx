@@ -57,6 +57,8 @@ const CompletionCertificate: React.FC = () => {
   } = useCerts();
 
   const pageRef = useRef<HTMLElement | null>(null);
+  const previewWrapRef = useRef<HTMLDivElement | null>(null);
+  const [previewScale, setPreviewScale] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -113,6 +115,27 @@ const CompletionCertificate: React.FC = () => {
       pendingScrollRef.current = null;
     }
   }, [index, pendingScrollRef]);
+
+  // Fit the 1123px certificate into the available width (preview only, PDF stays full size)
+  const hasPage = Boolean(page);
+  useEffect(() => {
+    const wrapper = previewWrapRef.current;
+    if (!wrapper) return;
+    const updateScale = () => {
+      const available = wrapper.clientWidth;
+      if (available > 0) {
+        setPreviewScale(Math.min(1, available / CERT_WIDTH));
+      }
+    };
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(wrapper);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
+  }, [hasPage]);
 
   const buildPdfFileName = () => `${PAGE_LABEL}.pdf`;
 
@@ -182,6 +205,12 @@ const CompletionCertificate: React.FC = () => {
           el.style.webkitTextFillColor = '#7a206c';
           el.style.color = '#7a206c';
         });
+        doc.querySelectorAll('[data-preview-scale="true"]').forEach((node) => {
+          const el = node as HTMLElement;
+          el.style.transform = 'none';
+          el.style.width = `${CERT_WIDTH}px`;
+          el.style.height = `${CERT_HEIGHT}px`;
+        });
         if (cloned) {
           cloned.style.boxShadow = 'none';
           cloned.style.width = `${CERT_WIDTH}px`;
@@ -243,9 +272,9 @@ const CompletionCertificate: React.FC = () => {
   );
 
   const renderInputs = (p: CertificateFields) => (
-    <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4 h-fit sticky top-10">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="w-full min-w-0 space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4 h-fit sticky top-10">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
           <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider">✏️ EDIT {p.certificateTitle}</h3>
           <p className="text-[10px] text-slate-500 mt-1">Each save creates a new completion certificate record</p>
         </div>
@@ -262,7 +291,7 @@ const CompletionCertificate: React.FC = () => {
               setEditMode(false);
             }
           }}
-          className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+          className="shrink-0 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
         >
           {isSaving ? 'Saving...' : editMode ? '💾 Save' : '✏️ Edit'}
         </button>
@@ -285,7 +314,7 @@ const CompletionCertificate: React.FC = () => {
 
         <div>
           <span className="block text-[10px] font-bold uppercase">Internship / Course / Project</span>
-          <div className="mt-2 flex flex-wrap gap-4">
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
             {COMPLETION_TYPES.map((type) => (
               <label key={type} className="flex items-center gap-2 text-sm">
                 <input
@@ -314,9 +343,9 @@ const CompletionCertificate: React.FC = () => {
     <div className="min-h-screen bg-slate-100 px-4 py-10">
       <div className="mx-auto max-w-[1700px]">
         <div className="flex flex-col gap-12">
-          <div className="grid gap-6 lg:grid-cols-[400px_1fr] pb-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(260px,300px)_minmax(0,1fr)] pb-8">
             {renderInputs(page)}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex min-w-0 flex-col items-center gap-4">
               <div className="w-full flex justify-end py-2">
                 <button
                   onClick={downloadPDF}
@@ -326,8 +355,24 @@ const CompletionCertificate: React.FC = () => {
                 </button>
               </div>
               <span className="bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold">{PAGE_LABEL}</span>
-              <div className="w-full overflow-x-auto">
-                <div className="flex justify-center min-w-[1123px]">
+              <div ref={previewWrapRef} className="w-full min-w-0">
+                <div
+                  style={{
+                    width: `${CERT_WIDTH * previewScale}px`,
+                    height: `${CERT_HEIGHT * previewScale}px`,
+                    margin: '0 auto',
+                    position: 'relative',
+                  }}
+                >
+                <div
+                  data-preview-scale="true"
+                  style={{
+                    width: `${CERT_WIDTH}px`,
+                    height: `${CERT_HEIGHT}px`,
+                    transform: `scale(${previewScale})`,
+                    transformOrigin: 'top left',
+                  }}
+                >
                   <section
                     ref={pageRef}
                     data-certificate-root="true"
@@ -753,6 +798,7 @@ const CompletionCertificate: React.FC = () => {
                     </div>
 
                   </section>
+                </div>
                 </div>
               </div>
             </div>
