@@ -13,7 +13,11 @@ const PAGE_INDEX = 3;
 const PAGE_LABEL = 'CERTIFICATE COMPLETION';
 const CERTIFICATE_BACKGROUND = "url('/document/PCS-Certificate-NOV26-RGB.jpeg')";
 const COMPLETION_TYPES = ['Internship', 'Course', 'Project'] as const;
-const DEFAULT_CERTIFICATE_NUMBER = 'PCS-COC-26-27/';
+const getDefaultCertificateNumber = () => {
+  const startYear = new Date().getFullYear();
+  const endYear = (startYear + 1) % 100;
+  return `PCS-COC-${String(startYear % 100).padStart(2, '0')}-${String(endYear).padStart(2, '0')}/`;
+};
 const CERT_WIDTH = 1123;
 // Badge overlay: centre of the round badge inside PCS-R-Badge.png, and overlay size.
 // Move BADGE_CENTER_X / BADGE_CENTER_Y if the text ring is not exactly concentric with the badge.
@@ -31,20 +35,23 @@ type CompletionOptions = {
 const readCompletionOptions = (content: string): CompletionOptions => {
   const marker = content.match(COMPLETION_OPTIONS_PATTERN);
   if (!marker) {
-    return { certificateNumber: DEFAULT_CERTIFICATE_NUMBER, completionTypes: [] };
+    return { certificateNumber: getDefaultCertificateNumber(), completionTypes: [] };
   }
 
   const [encodedNumber, encodedTypes = ''] = marker[1].split('|');
   try {
     return {
-      certificateNumber: decodeURIComponent(encodedNumber),
+      certificateNumber: decodeURIComponent(encodedNumber).replace(
+        /^PCS-COC-\d{2}-\d{2}\//,
+        getDefaultCertificateNumber()
+      ),
       completionTypes: decodeURIComponent(encodedTypes)
         .split(',')
         .filter((type) => COMPLETION_TYPES.includes(type as (typeof COMPLETION_TYPES)[number])),
     };
   } catch (error) {
     console.error('Unable to read Certificate Completion options:', error);
-    return { certificateNumber: DEFAULT_CERTIFICATE_NUMBER, completionTypes: [] };
+    return { certificateNumber: getDefaultCertificateNumber(), completionTypes: [] };
   }
 };
 
