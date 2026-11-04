@@ -80,6 +80,14 @@ const CompletionCertificate: React.FC = () => {
   const [previewCompletionTypes, setPreviewCompletionTypes] = useState<string[]>(
     () => completionOptions.completionTypes
   );
+  const [previewCertificateNumber, setPreviewCertificateNumber] = useState(
+    () => completionOptions.certificateNumber
+  );
+  const certificateNumberPrefix = getDefaultCertificateNumber();
+  const certificateNumberSuffix = completionOptions.certificateNumber.replace(
+    certificateNumberPrefix,
+    ''
+  );
 
   const updateCompletionOptions = (options: CompletionOptions) => {
     handleChange(index, 'certificateContent', writeCompletionOptions(page.certificateContent, options));
@@ -92,7 +100,7 @@ const CompletionCertificate: React.FC = () => {
     }
 
     const payload = {
-      serialNumber: completionOptions.certificateNumber.trim(),
+      serialNumber: `${certificateNumberPrefix}${certificateNumberSuffix}`.trim(),
       completionType: completionOptions.completionTypes,
       certificateTitle: page.certificateTitle.trim().replace(/\s+/g, ' ').toUpperCase(),
     };
@@ -110,7 +118,12 @@ const CompletionCertificate: React.FC = () => {
       }
 
       setPreviewCompletionTypes(completionOptions.completionTypes);
-      updateCompletionOptions({ ...completionOptions, completionTypes: [] });
+      setPreviewCertificateNumber(payload.serialNumber);
+      updateCompletionOptions({
+        ...completionOptions,
+        certificateNumber: certificateNumberPrefix,
+        completionTypes: [],
+      });
       toast.success('Completion Certificate Saved!');
       return true;
     } catch (error) {
@@ -318,14 +331,22 @@ const CompletionCertificate: React.FC = () => {
           <label htmlFor="completion-certificate-number" className="block text-[10px] font-bold uppercase">
             Certificate No
           </label>
-          <input
-            id="completion-certificate-number"
-            value={completionOptions.certificateNumber}
-            onChange={(e) =>
-              updateCompletionOptions({ ...completionOptions, certificateNumber: e.target.value })
-            }
-            className="mt-1 w-full border px-3 py-2 text-sm rounded"
-          />
+          <div className="mt-1 flex w-full items-center rounded border bg-white text-sm">
+            <span className="whitespace-nowrap border-r bg-slate-100 px-2 py-2 text-slate-700">
+              {certificateNumberPrefix}
+            </span>
+            <input
+              id="completion-certificate-number"
+              aria-label="Certificate number suffix"
+              value={certificateNumberSuffix}
+              onChange={(e) => {
+                const certificateNumber = `${certificateNumberPrefix}${e.target.value}`;
+                setPreviewCertificateNumber(certificateNumber);
+                updateCompletionOptions({ ...completionOptions, certificateNumber });
+              }}
+              className="min-w-0 flex-1 px-3 py-2 outline-none"
+            />
+          </div>
         </div>
 
         <div>
@@ -442,7 +463,7 @@ const CompletionCertificate: React.FC = () => {
                         top: '38%',
                         left: '20%',
                         width: '50%',
-                        height: '7%',
+                        height: '7.5%',
                         objectFit: 'contain',
                         pointerEvents: 'none',
                         zIndex: 2,
@@ -543,7 +564,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '71.6%',
+                        top: '71.8%',
                         left: '80%',
                         width: '0.8%',
                         height: '2%',
@@ -558,7 +579,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '77.8%',
+                        top: '77.9%',
                         left: '80%',
                         width: '0.8%',
                         height: '2%',
@@ -573,7 +594,7 @@ const CompletionCertificate: React.FC = () => {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        top: '84%',
+                        top: '84.2%',
                         left: '80%',
                         width: '0.8%',
                         height: '2%',
@@ -592,8 +613,8 @@ const CompletionCertificate: React.FC = () => {
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
                     >
-                      <div style={{ fontSize: '72px' }}>CERTIFICATE</div>
-                      <div style={{ marginTop: '3px', fontSize: '42px' }}>
+                      <div style={{ fontSize: '60px' }}>CERTIFICATE</div>
+                      <div style={{ marginTop: '3px', fontSize: '33px' }}>
                         <span
                           data-gradient-text="true"
                           style={{
@@ -611,16 +632,16 @@ const CompletionCertificate: React.FC = () => {
                       </div>
                     </div>
                     <div
-                      className="absolute left-[45%] top-[34%] z-10 -translate-x-1/2 whitespace-nowrap text-center text-[18px] font-bold text-[#211d5b]"
+                      className="absolute left-[45%] top-[34%] z-10 -translate-x-1/2 whitespace-nowrap text-center text-[17px] font-bold text-[#211d5b]"
                       style={{ fontFamily: "'WF Visual Sans', sans-serif" }}
                     >
-                      Certificate No: {completionOptions.certificateNumber}
+                      Certificate No: {previewCertificateNumber}
                     </div>
 
                     <div
-                      className="absolute z-10 text-center text-[20px] font-bold text-[#211d5b]"
+                      className="absolute z-10 text-center text-[22px] font-bold text-[#211d5b]"
                       style={{
-                        top: '39.3%',
+                        top: '39%',
                         left: '20%',
                         width: '50%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
@@ -697,7 +718,7 @@ const CompletionCertificate: React.FC = () => {
                       }}
                     />
                     <div
-                      className="absolute z-10 flex text-[15px] font-bold text-[#211d5b]"
+                      className="absolute z-10 flex text-[16px] font-bold text-[#211d5b]"
                       style={{
                         top: '71.2%',
                         left: '20%',
@@ -715,7 +736,7 @@ const CompletionCertificate: React.FC = () => {
                       </div>
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[14px] font-semibold leading-[1.45] text-[#211d5b]"
+                      className="absolute z-10 text-center text-[16px] font-semibold leading-[1.45] text-[#211d5b]"
                       style={{
                         top: '76.5%',
                         left: '14%',
@@ -732,7 +753,7 @@ const CompletionCertificate: React.FC = () => {
                       <div>success in their future endeavors.</div>
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
+                      className="absolute z-10 text-center text-[12px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
                       style={{
                         top: '70%',
                         left: '77%',
@@ -743,7 +764,7 @@ const CompletionCertificate: React.FC = () => {
                       PLACE..
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[14px] font-semibold text-black"
+                      className="absolute z-10 text-center text-[15px] font-semibold text-black"
                       style={{
                         top: '71.5%',
                         left: '77.2%',
@@ -754,7 +775,7 @@ const CompletionCertificate: React.FC = () => {
                       Surandai
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
+                      className="absolute z-10 text-center text-[12px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
                       style={{
                         top: '76%',
                         left: '77.7%',
@@ -765,10 +786,10 @@ const CompletionCertificate: React.FC = () => {
                       CONNECT..
                     </div>
                     <div
-                      className="absolute z-10 whitespace-nowrap text-center text-[13px] font-semibold text-black"
+                      className="absolute z-10 whitespace-nowrap text-center text-[14px] font-semibold text-black"
                       style={{
                         top: '77.7%',
-                        left: '79.1%',
+                        left: '79.3%',
                         width: '16%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -776,7 +797,7 @@ const CompletionCertificate: React.FC = () => {
                       Contact@pcstech.in
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
+                      className="absolute z-10 text-center text-[12px] font-bold uppercase tracking-[0.12em] text-[#ed0b72]"
                       style={{
                         top: '82%',
                         left: '77.5%',
@@ -787,10 +808,10 @@ const CompletionCertificate: React.FC = () => {
                       SEARCH..
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[13px] font-semibold text-black"
+                      className="absolute z-10 text-center text-[14px] font-semibold text-black"
                       style={{
                         top: '83.7%',
-                        left: '79%',
+                        left: '79.2%',
                         width: '14%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -809,9 +830,9 @@ const CompletionCertificate: React.FC = () => {
                       /f pcstechsurandai
                     </div>
                     <div
-                      className="absolute z-10 text-[14px] font-bold text-[#211d5b]"
+                      className="absolute z-10 text-[16px] font-bold text-[#211d5b]"
                       style={{
-                        top: '91%',
+                        top: '93%',
                         left: '15%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -819,9 +840,9 @@ const CompletionCertificate: React.FC = () => {
                       Date Of Issue
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[14px] font-bold text-[#211d5b]"
+                      className="absolute z-10 text-center text-[16px] font-bold text-[#211d5b]"
                       style={{
-                        top: '91%',
+                        top: '93%',
                         left: '57%',
                         width: '20%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
