@@ -332,7 +332,7 @@ const CompletionCertificate: React.FC = () => {
             Certificate No
           </label>
           <div className="mt-1 flex w-full items-center rounded border bg-white text-sm">
-            <span className="whitespace-nowrap border-r bg-slate-100 px-2 py-2 text-slate-700">
+            <span className="border-r bg-slate-100 px-2 py-2 text-slate-700">
               {certificateNumberPrefix}
             </span>
             <input
@@ -819,15 +819,20 @@ const CompletionCertificate: React.FC = () => {
                       www.pcstech.in
                     </div>
                     <div
-                      className="absolute z-10 text-center text-[10px] font-semibold text-black"
+                      className="absolute z-10 flex items-center gap-[3px] whitespace-nowrap text-[10px] font-semibold text-black"
                       style={{
-                        top: '86%',
-                        left: '78%',
+                        top: '86.8%',
+                        left: '81.5%',
                         width: '15%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
                     >
-                      /f pcstechsurandai
+                      <img
+                        src="/document/PNG/Facebook, LinkedIn, and Instagram Icons.png"
+                        alt="Facebook, LinkedIn, and Instagram"
+                        className="h-auto w-12 shrink-0"
+                      />
+                      <span>/ pcstechsurandai</span>
                     </div>
                     <div
                       className="absolute z-10 text-[16px] font-bold text-[#211d5b]"
