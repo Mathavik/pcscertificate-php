@@ -2,22 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { SavedCertificate } from './CertificateContext';
 import toast from 'react-hot-toast';
 
+type SavedCompletionCertificate = {
+  id: number;
+  certificateID: number;
+  serialNumber: string;
+  completionType: string;
+  certificateTitle: string;
+  studentName: string;
+  courseTitle: string;
+  fromDate: string | null;
+  toDate: string | null;
+  dateOfIssue: string | null;
+  createdAt: string;
+};
+
 type CertificateManagerProps = {
   certificateStats: Array<{ certificateTitle: string; count: number }>;
   adminCertificates: SavedCertificate[];
-  completionCertificates?: Array<{
-    id: number;
-    certificateID: number;
-    serialNumber: string;
-    completionType: string;
-    certificateTitle: string;
-    studentName: string;
-    courseTitle: string;
-    fromDate: string | null;
-    toDate: string | null;
-    dateOfIssue: string | null;
-    createdAt: string;
-  }>;
+  completionCertificates?: SavedCompletionCertificate[];
   saveStatus: string;
   onLoadSaved: () => void | Promise<void>;
   onLoadIntoEditor: (c: SavedCertificate) => void;
@@ -61,7 +63,9 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   const PAGE_SIZE = 10;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [certificatePage, setCertificatePage] = useState(1);
+  const [completionPage, setCompletionPage] = useState(1);
+  const [selectedCompletion, setSelectedCompletion] = useState<SavedCompletionCertificate | null>(null);
 
   const managerEntries: CertificateManagerEntry[] = [
     ...adminCertificates
@@ -90,7 +94,8 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   ];
 
   useEffect(() => {
-    setCurrentPage(1);
+    setCertificatePage(1);
+    setCompletionPage(1);
   }, [selectedTitle, selectedYear, selectedMonth, searchQuery, completionCertificates.length]);
 
   const formatDateForDisplay = (dateStr: string): string => {
@@ -187,10 +192,65 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     (selectedMonth ? 1 : 0) +
     (normalizedQuery ? 1 : 0);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
-  const startIndex = (safePage - 1) * PAGE_SIZE;
-  const paginatedCertificates = filteredCertificates.slice(startIndex, startIndex + PAGE_SIZE);
+  const filteredSavedCompletion = completionCertificates.filter((completion) =>
+    filteredCertificates.some((entry) => entry.source === 'completion' && entry.id === completion.id)
+  );
+  const filteredSavedCertificates = filteredCertificates.filter(
+    (entry) => entry.source === 'certificate'
+  );
+  const certificateTotalPages = Math.max(1, Math.ceil(filteredSavedCertificates.length / PAGE_SIZE));
+  const completionTotalPages = Math.max(1, Math.ceil(filteredSavedCompletion.length / PAGE_SIZE));
+  const safeCertificatePage = Math.min(certificatePage, certificateTotalPages);
+  const safeCompletionPage = Math.min(completionPage, completionTotalPages);
+  const certificateStartIndex = (safeCertificatePage - 1) * PAGE_SIZE;
+  const completionStartIndex = (safeCompletionPage - 1) * PAGE_SIZE;
+  const paginatedCertificates = filteredSavedCertificates.slice(
+    certificateStartIndex,
+    certificateStartIndex + PAGE_SIZE
+  );
+  const paginatedCompletions = filteredSavedCompletion.slice(
+    completionStartIndex,
+    completionStartIndex + PAGE_SIZE
+  );
+
+  const renderPagination = (
+    count: number,
+    current: number,
+    total: number,
+    start: number,
+    setPage: (page: number) => void
+  ) => total > 1 ? (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-xs text-slate-600">
+        Showing {start + 1}–{Math.min(start + PAGE_SIZE, count)} of {count}
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => setPage(current - 1)}
+          disabled={current <= 1}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ‹ Prev
+        </button>
+        {Array.from({ length: total }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => setPage(page)}
+            className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${page === current ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          >
+            {page}
+          </button>
+        ))}
+        <button
+          onClick={() => setPage(current + 1)}
+          disabled={current >= total}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next ›
+        </button>
+      </div>
+    </div>
+  ) : null;
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
@@ -386,20 +446,19 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
         </div>
       ) : (
         <>
-        <div className="mt-4 overflow-x-auto">
           {(selectedTitle || selectedYear || selectedMonth || normalizedQuery) && (
-            <div className="mb-3 flex items-center justify-between bg-blue-50/50 px-3 py-2 rounded-lg text-sm text-slate-700">
-              <div className="flex flex-wrap gap-2 items-center">
+            <div className="mt-4 flex items-center justify-between rounded-lg bg-blue-50/50 px-3 py-2 text-sm text-slate-700">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold">Active Filters:</span>
-                {selectedTitle && <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">{selectedTitle}</span>}
-                {selectedYear && <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-xs">Year: {selectedYear}</span>}
+                {selectedTitle && <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800">{selectedTitle}</span>}
+                {selectedYear && <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs text-indigo-800">Year: {selectedYear}</span>}
                 {selectedMonth && (
-                  <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs">
-                    Month: {monthsList.find(m => m.value === selectedMonth)?.label}
+                  <span className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-800">
+                    Month: {monthsList.find((month) => month.value === selectedMonth)?.label}
                   </span>
                 )}
                 {normalizedQuery && (
-                  <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs">
+                  <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">
                     Student Name: {searchQuery.trim()}
                   </span>
                 )}
@@ -407,96 +466,170 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             </div>
           )}
 
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-100 text-slate-800">
-              <tr>
-                <th className="px-3 py-2 text-left font-semibold">certificateID</th>
-                <th className="px-3 py-2 text-left font-semibold">Student / Serial No</th>
-                <th className="px-3 py-2 text-left font-semibold">College / Type</th>
-                <th className="px-3 py-2 text-left font-semibold">Certificate</th>
-                {!isCompletionTitleSelected && (
-                  <>
-                    <th className="px-3 py-2 text-left font-semibold">From</th>
-                    <th className="px-3 py-2 text-left font-semibold">To</th>
-                  </>
-                )}
-                <th className="px-3 py-2 text-left font-semibold">Date</th>
-                {!isCompletionTitleSelected && (
-                  <th className="px-3 py-2 text-left font-semibold">Actions</th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {paginatedCertificates.map((c) => (
-                <tr key={`${c.source}-${c.id}`} className="hover:bg-slate-50 border-b border-slate-100 last:border-0">
-                  <td className="px-3 py-2">{c.source === 'completion' ? `${c.certificateID}` : c.certificateID}</td>
-                  <td className="px-3 py-2">
-                    {c.source === 'completion'
-                      ? <>{c.studentName}<div className="text-xs text-slate-500">{c.serialNumber}</div></>
-                      : c.studentName}
-                  </td>
-                  <td className="px-3 py-2">{c.source === 'completion' ? c.completionType : c.collegeName}</td>
-                  <td className="px-3 py-2">{c.certificateTitle}</td>
-                  {!isCompletionTitleSelected && (
-                    <>
-                      <td className="px-3 py-2">{formatDateForDisplay(c.fromDate || '')}</td>
-                      <td className="px-3 py-2">{formatDateForDisplay(c.toDate || '')}</td>
-                    </>
+          {(!selectedTitle || isCompletionTitleSelected) && (
+            <section className="mt-5">
+              <h3 className="mb-2 text-sm font-bold uppercase text-slate-700">CERTIFICATE COMPLETION</h3>
+              {filteredSavedCompletion.length === 0 ? (
+                <p className="rounded-lg bg-slate-50 p-4 text-center text-sm text-slate-600">
+                  No Certificate Completion records found.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-slate-100 text-slate-800">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold">ID</th>
+                        <th className="px-3 py-2 text-left font-semibold">Student / Serial No</th>
+                        <th className="px-3 py-2 text-left font-semibold">Course Type</th>
+                        <th className="px-3 py-2 text-left font-semibold">Certificate</th>
+                        <th className="px-3 py-2 text-left font-semibold">Date</th>
+                        <th className="px-3 py-2 text-left font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white">
+                      {paginatedCompletions.map((completion) => (
+                        <tr key={`completion-${completion.id}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                          <td className="px-3 py-2">{completion.id}</td>
+                          <td className="px-3 py-2">
+                            {completion.studentName}
+                            <div className="text-xs text-slate-500">{completion.serialNumber}</div>
+                          </td>
+                          <td className="px-3 py-2">{completion.completionType}</td>
+                          <td className="px-3 py-2">{completion.certificateTitle}</td>
+                          <td className="px-3 py-2 font-medium text-slate-600">
+                            {formatDateForDisplay(completion.dateOfIssue || completion.createdAt?.slice(0, 10) || '')}
+                          </td>
+                          <td className="px-3 py-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedCompletion(completion)}
+                              className="rounded bg-blue-700 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-800"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {renderPagination(
+                    filteredSavedCompletion.length,
+                    safeCompletionPage,
+                    completionTotalPages,
+                    completionStartIndex,
+                    setCompletionPage
                   )}
-                  <td className="px-3 py-2 font-medium text-slate-600">{formatDateForDisplay(c.date || '')}</td>
-                  {!isCompletionTitleSelected && (
-                    <td className="px-3 py-2">
-                      {c.source === 'certificate' && c.certificate && (
-                        <button
-                          onClick={() => {
-                            if (c.certificate) handleLoadClick(c.certificate);
-                          }}
-                          className="text-xs bg-emerald-600 hover:bg-emerald-700 transition-colors text-white px-2 py-1 rounded"
-                        >
-                          Load
-                        </button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                </div>
+              )}
+            </section>
+          )}
 
-          {totalPages > 1 && (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-slate-600">
-                Showing {startIndex + 1}–{Math.min(startIndex + PAGE_SIZE, filteredCertificates.length)} of {filteredCertificates.length}
-              </p>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(safePage - 1)}
-                  disabled={safePage <= 1}
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  ‹ Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-                  <button
-                    key={pg}
-                    onClick={() => setCurrentPage(pg)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${pg === safePage ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-                  >
-                    {pg}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(safePage + 1)}
-                  disabled={safePage >= totalPages}
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Next ›
-                </button>
-              </div>
-            </div>
+          {(!selectedTitle || !isCompletionTitleSelected) && (
+            <section className="mt-6">
+              <h3 className="mb-2 text-sm font-bold uppercase text-slate-700">
+                {selectedTitle || 'INTERNSHIP COMPLETION CERTIFICATE'}
+              </h3>
+              {filteredSavedCertificates.length === 0 ? (
+                <p className="rounded-lg bg-slate-50 p-4 text-center text-sm text-slate-600">
+                  No certificate records found.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-slate-100 text-slate-800">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold">ID</th>
+                        <th className="px-3 py-2 text-left font-semibold">Student</th>
+                        <th className="px-3 py-2 text-left font-semibold">College</th>
+                        <th className="px-3 py-2 text-left font-semibold">Certificate</th>
+                        <th className="px-3 py-2 text-left font-semibold">From</th>
+                        <th className="px-3 py-2 text-left font-semibold">To</th>
+                        <th className="px-3 py-2 text-left font-semibold">Date</th>
+                        <th className="px-3 py-2 text-left font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white">
+                      {paginatedCertificates.map((entry) => (
+                        <tr key={`certificate-${entry.id}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                          <td className="px-3 py-2">{entry.id}</td>
+                          <td className="px-3 py-2">{entry.studentName}</td>
+                          <td className="px-3 py-2">{entry.collegeName}</td>
+                          <td className="px-3 py-2">{entry.certificateTitle}</td>
+                          <td className="px-3 py-2">{formatDateForDisplay(entry.fromDate || '')}</td>
+                          <td className="px-3 py-2">{formatDateForDisplay(entry.toDate || '')}</td>
+                          <td className="px-3 py-2 font-medium text-slate-600">
+                            {formatDateForDisplay(entry.date || '')}
+                          </td>
+                          <td className="px-3 py-2">
+                            {entry.certificate && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (entry.certificate) handleLoadClick(entry.certificate);
+                                }}
+                                className="rounded bg-emerald-600 px-2 py-1 text-xs text-white transition-colors hover:bg-emerald-700"
+                              >
+                                Load
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {renderPagination(
+                    filteredSavedCertificates.length,
+                    safeCertificatePage,
+                    certificateTotalPages,
+                    certificateStartIndex,
+                    setCertificatePage
+                  )}
+                </div>
+              )}
+            </section>
           )}
         </>
+      )}
+
+      {selectedCompletion && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="presentation"
+          onClick={() => setSelectedCompletion(null)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="completion-details-title"
+            className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 id="completion-details-title" className="text-lg font-bold text-slate-900">
+                Certificate Completion Details
+              </h3>
+              <button
+                type="button"
+                onClick={() => setSelectedCompletion(null)}
+                aria-label="Close details"
+                className="rounded px-2 py-1 text-slate-500 hover:bg-slate-100"
+              >
+                ✕
+              </button>
+            </div>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <dt className="font-semibold text-slate-600">ID</dt><dd>{selectedCompletion.id}</dd>
+              <dt className="font-semibold text-slate-600">Student</dt><dd>{selectedCompletion.studentName}</dd>
+              <dt className="font-semibold text-slate-600">Serial No</dt><dd>{selectedCompletion.serialNumber}</dd>
+              <dt className="font-semibold text-slate-600">Course Title</dt><dd>{selectedCompletion.courseTitle}</dd>
+              <dt className="font-semibold text-slate-600">Course Type</dt><dd>{selectedCompletion.completionType}</dd>
+              <dt className="font-semibold text-slate-600">From</dt><dd>{formatDateForDisplay(selectedCompletion.fromDate || '')}</dd>
+              <dt className="font-semibold text-slate-600">To</dt><dd>{formatDateForDisplay(selectedCompletion.toDate || '')}</dd>
+              <dt className="font-semibold text-slate-600">Date</dt>
+              <dd>{formatDateForDisplay(selectedCompletion.dateOfIssue || selectedCompletion.createdAt?.slice(0, 10) || '')}</dd>
+            </dl>
+          </section>
+        </div>
       )}
     </div>
   );
