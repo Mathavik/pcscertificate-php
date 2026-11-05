@@ -49,16 +49,28 @@ if (!is_array($input)) {
 $serialNumberInput = $input['serialNumber'] ?? null;
 $certificateTitleInput = $input['certificateTitle'] ?? null;
 $completionTypes = $input['completionType'] ?? null;
+$studentNameInput = $input['studentName'] ?? null;
+$courseTitleInput = $input['courseTitle'] ?? null;
+$fromDateInput = $input['fromDate'] ?? null;
+$toDateInput = $input['toDate'] ?? null;
+$dateOfIssueInput = $input['dateOfIssue'] ?? null;
+$signatureImageInput = $input['signatureImage'] ?? '';
 $allowedTypes = ['Internship', 'Course', 'Project'];
 
 if (
     !is_string($serialNumberInput) ||
     !is_string($certificateTitleInput) ||
-    !is_array($completionTypes)
+    !is_array($completionTypes) ||
+    !is_string($studentNameInput) ||
+    !is_string($courseTitleInput) ||
+    !is_string($fromDateInput) ||
+    !is_string($toDateInput) ||
+    !is_string($dateOfIssueInput) ||
+    !is_string($signatureImageInput)
 ) {
     http_response_code(422);
     echo json_encode([
-        'message' => 'serialNumber, completionType, and certificateTitle are required.',
+        'message' => 'Certificate number, type, title, student, course, and date fields are required.',
     ]);
     exit;
 }
@@ -73,11 +85,40 @@ foreach ($completionTypes as $type) {
 
 $serialNumber = trim($serialNumberInput);
 $certificateTitle = trim(preg_replace('/\s+/', ' ', $certificateTitleInput));
-if ($serialNumber === '' || $certificateTitle === '') {
+$studentName = trim($studentNameInput);
+$courseTitle = trim($courseTitleInput);
+if ($serialNumber === '' || $certificateTitle === '' || $studentName === '' || $courseTitle === '') {
     http_response_code(422);
     echo json_encode([
-        'message' => 'serialNumber and certificateTitle cannot be empty.',
+        'message' => 'Certificate number, title, student name, and course title cannot be empty.',
     ]);
+    exit;
+}
+
+$isValidDate = function ($value) {
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+        return false;
+    }
+    $parts = explode('-', $value);
+    return checkdate((int)$parts[1], (int)$parts[2], (int)$parts[0]);
+};
+
+if (!$isValidDate($fromDateInput) || !$isValidDate($toDateInput) || !$isValidDate($dateOfIssueInput)) {
+    http_response_code(422);
+    echo json_encode(['message' => 'From, to, and issue dates must be valid dates.']);
+    exit;
+}
+
+if (
+    $signatureImageInput !== '' &&
+    $signatureImageInput !== '/images/signature.png' &&
+    (
+        strlen($signatureImageInput) > 3000000 ||
+        !preg_match('#^data:image/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/]+={0,2}$#', $signatureImageInput)
+    )
+) {
+    http_response_code(422);
+    echo json_encode(['message' => 'Signature image must be a valid PNG, JPEG, or WEBP image under 2 MB.']);
     exit;
 }
 
@@ -94,6 +135,12 @@ $data = [
     'serialNumber' => $serialNumber,
     'completionType' => implode(', ', $completionTypes),
     'certificateTitle' => $certificateTitle,
+    'studentName' => $studentName,
+    'courseTitle' => $courseTitle,
+    'fromDate' => $fromDateInput,
+    'toDate' => $toDateInput,
+    'dateOfIssue' => $dateOfIssueInput,
+    'signatureImage' => $signatureImageInput !== '' ? $signatureImageInput : null,
 ];
 
 try {

@@ -11,6 +11,11 @@ type CertificateManagerProps = {
     serialNumber: string;
     completionType: string;
     certificateTitle: string;
+    studentName: string;
+    courseTitle: string;
+    fromDate: string | null;
+    toDate: string | null;
+    dateOfIssue: string | null;
     createdAt: string;
   }>;
   saveStatus: string;
@@ -76,7 +81,8 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
       id: certificate.id,
       source: 'completion' as const,
       certificateTitle: certificate.certificateTitle,
-      date: certificate.createdAt?.slice(0, 10) || '',
+      studentName: certificate.studentName,
+      date: certificate.dateOfIssue || certificate.createdAt?.slice(0, 10) || '',
       serialNumber: certificate.serialNumber,
       completionType: certificate.completionType,
       certificateID: certificate.certificateID,
@@ -424,7 +430,11 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
               {paginatedCertificates.map((c) => (
                 <tr key={`${c.source}-${c.id}`} className="hover:bg-slate-50 border-b border-slate-100 last:border-0">
                   <td className="px-3 py-2">{c.source === 'completion' ? `${c.certificateID}` : c.certificateID}</td>
-                  <td className="px-3 py-2">{c.source === 'completion' ? c.serialNumber : c.studentName}</td>
+                  <td className="px-3 py-2">
+                    {c.source === 'completion'
+                      ? <>{c.studentName}<div className="text-xs text-slate-500">{c.serialNumber}</div></>
+                      : c.studentName}
+                  </td>
                   <td className="px-3 py-2">{c.source === 'completion' ? c.completionType : c.collegeName}</td>
                   <td className="px-3 py-2">{c.certificateTitle}</td>
                   {!isCompletionTitleSelected && (

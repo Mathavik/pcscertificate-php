@@ -18,13 +18,21 @@ class CompletionCertificate
 
         try {
             $stmt = $this->pdo->prepare(
-                "INSERT INTO completion_certificates (serialNumber, completionType, certificateTitle)
-                 VALUES (:serialNumber, :completionType, :certificateTitle)"
+                "INSERT INTO completion_certificates
+                    (serialNumber, completionType, certificateTitle, studentName, courseTitle, fromDate, toDate, dateOfIssue, signatureImage)
+                 VALUES
+                    (:serialNumber, :completionType, :certificateTitle, :studentName, :courseTitle, :fromDate, :toDate, :dateOfIssue, :signatureImage)"
             );
             $stmt->execute([
                 ':serialNumber' => $data['serialNumber'],
                 ':completionType' => $data['completionType'],
                 ':certificateTitle' => $data['certificateTitle'],
+                ':studentName' => $data['studentName'],
+                ':courseTitle' => $data['courseTitle'],
+                ':fromDate' => $data['fromDate'],
+                ':toDate' => $data['toDate'],
+                ':dateOfIssue' => $data['dateOfIssue'],
+                ':signatureImage' => $data['signatureImage'],
             ]);
 
             $id = (int)$this->pdo->lastInsertId();
@@ -56,13 +64,25 @@ class CompletionCertificate
             "UPDATE completion_certificates
              SET serialNumber = :serialNumber,
                  completionType = :completionType,
-                 certificateTitle = :certificateTitle
+                 certificateTitle = :certificateTitle,
+                 studentName = :studentName,
+                 courseTitle = :courseTitle,
+                 fromDate = :fromDate,
+                 toDate = :toDate,
+                 dateOfIssue = :dateOfIssue,
+                 signatureImage = :signatureImage
              WHERE id = :id"
         );
         $stmt->execute([
             ':serialNumber' => $data['serialNumber'],
             ':completionType' => $data['completionType'],
             ':certificateTitle' => $data['certificateTitle'],
+            ':studentName' => $data['studentName'],
+            ':courseTitle' => $data['courseTitle'],
+            ':fromDate' => $data['fromDate'],
+            ':toDate' => $data['toDate'],
+            ':dateOfIssue' => $data['dateOfIssue'],
+            ':signatureImage' => $data['signatureImage'],
             ':id' => $id,
         ]);
 

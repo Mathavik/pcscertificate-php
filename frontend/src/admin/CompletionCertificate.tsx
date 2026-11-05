@@ -26,21 +26,55 @@ const BADGE_CENTER_Y = '48.5%';
 const BADGE_SVG_WIDTH = '17.9%';
 const CERT_HEIGHT = 794;
 const COMPLETION_OPTIONS_PATTERN = /<!--completionCertificateOptions:([\s\S]*?)-->/;
+const DEFAULT_SIGNATURE_IMAGE = '/images/signature.png';
 
 type CompletionOptions = {
   certificateNumber: string;
   completionTypes: string[];
+  studentName: string;
+  courseTitle: string;
+  fromDate: string;
+  toDate: string;
+  dateOfIssue: string;
+  signatureImage: string;
 };
+
+const getDefaultCompletionOptions = (): CompletionOptions => ({
+  certificateNumber: getDefaultCertificateNumber(),
+  completionTypes: [],
+  studentName: '',
+  courseTitle: '',
+  fromDate: '',
+  toDate: '',
+  dateOfIssue: '',
+  signatureImage: DEFAULT_SIGNATURE_IMAGE,
+});
 
 const readCompletionOptions = (content: string): CompletionOptions => {
   const marker = content.match(COMPLETION_OPTIONS_PATTERN);
   if (!marker) {
-    return { certificateNumber: getDefaultCertificateNumber(), completionTypes: [] };
+    return getDefaultCompletionOptions();
   }
 
-  const [encodedNumber, encodedTypes = ''] = marker[1].split('|');
   try {
+    const decoded = decodeURIComponent(marker[1]);
+    if (decoded.startsWith('{')) {
+      const saved = JSON.parse(decoded) as Partial<CompletionOptions>;
+      return {
+        ...getDefaultCompletionOptions(),
+        ...saved,
+        signatureImage: saved.signatureImage || DEFAULT_SIGNATURE_IMAGE,
+        completionTypes: Array.isArray(saved.completionTypes)
+          ? saved.completionTypes.filter((type) =>
+              COMPLETION_TYPES.includes(type as (typeof COMPLETION_TYPES)[number])
+            )
+          : [],
+      };
+    }
+
+    const [encodedNumber, encodedTypes = ''] = marker[1].split('|');
     return {
+      ...getDefaultCompletionOptions(),
       certificateNumber: decodeURIComponent(encodedNumber).replace(
         /^PCS-COC-\d{2}-\d{2}\//,
         getDefaultCertificateNumber()
@@ -51,14 +85,20 @@ const readCompletionOptions = (content: string): CompletionOptions => {
     };
   } catch (error) {
     console.error('Unable to read Certificate Completion options:', error);
-    return { certificateNumber: getDefaultCertificateNumber(), completionTypes: [] };
+    return getDefaultCompletionOptions();
   }
 };
 
 const writeCompletionOptions = (content: string, options: CompletionOptions) => {
   const cleanContent = content.replace(COMPLETION_OPTIONS_PATTERN, '').trimEnd();
-  const marker = `<!--completionCertificateOptions:${encodeURIComponent(options.certificateNumber)}|${encodeURIComponent(options.completionTypes.join(','))}-->`;
+  const marker = `<!--completionCertificateOptions:${encodeURIComponent(JSON.stringify(options))}-->`;
   return cleanContent ? `${cleanContent}\n\n${marker}` : marker;
+};
+
+const formatCompletionDate = (date: string) => {
+  if (!date) return '';
+  const [year, month, day] = date.split('-');
+  return year && month && day ? `${day}.${month}.${year}` : date;
 };
 
 const CompletionCertificate: React.FC = () => {
@@ -83,6 +123,7 @@ const CompletionCertificate: React.FC = () => {
   const [previewCertificateNumber, setPreviewCertificateNumber] = useState(
     () => completionOptions.certificateNumber
   );
+  const [previewDetails, setPreviewDetails] = useState(() => completionOptions);
   const certificateNumberPrefix = getDefaultCertificateNumber();
   const certificateNumberSuffix = completionOptions.certificateNumber.replace(
     certificateNumberPrefix,
@@ -93,9 +134,28 @@ const CompletionCertificate: React.FC = () => {
     handleChange(index, 'certificateContent', writeCompletionOptions(page.certificateContent, options));
   };
 
+  const updateCompletionField = <K extends keyof CompletionOptions>(
+    key: K,
+    value: CompletionOptions[K]
+  ) => {
+    const updatedOptions = { ...completionOptions, [key]: value };
+    updateCompletionOptions(updatedOptions);
+    setPreviewDetails(updatedOptions);
+  };
+
   const saveCompletionCertificate = async () => {
     if (completionOptions.completionTypes.length === 0) {
       toast.error('Please select Internship, Course, or Project before saving.');
+      return false;
+    }
+    if (
+      !completionOptions.studentName.trim() ||
+      !completionOptions.courseTitle.trim() ||
+      !completionOptions.fromDate ||
+      !completionOptions.toDate ||
+      !completionOptions.dateOfIssue
+    ) {
+      toast.error('Please complete the student, course, and date fields before saving.');
       return false;
     }
 
@@ -103,6 +163,12 @@ const CompletionCertificate: React.FC = () => {
       serialNumber: `${certificateNumberPrefix}${certificateNumberSuffix}`.trim(),
       completionType: completionOptions.completionTypes,
       certificateTitle: page.certificateTitle.trim().replace(/\s+/g, ' ').toUpperCase(),
+      studentName: completionOptions.studentName.trim(),
+      courseTitle: completionOptions.courseTitle.trim(),
+      fromDate: completionOptions.fromDate,
+      toDate: completionOptions.toDate,
+      dateOfIssue: completionOptions.dateOfIssue,
+      signatureImage: completionOptions.signatureImage,
     };
 
     try {
@@ -119,11 +185,8 @@ const CompletionCertificate: React.FC = () => {
 
       setPreviewCompletionTypes(completionOptions.completionTypes);
       setPreviewCertificateNumber(payload.serialNumber);
-      updateCompletionOptions({
-        ...completionOptions,
-        certificateNumber: certificateNumberPrefix,
-        completionTypes: [],
-      });
+      setPreviewDetails(completionOptions);
+      updateCompletionOptions(getDefaultCompletionOptions());
       toast.success('Completion Certificate Saved!');
       return true;
     } catch (error) {
@@ -350,6 +413,19 @@ const CompletionCertificate: React.FC = () => {
         </div>
 
         <div>
+          <label htmlFor="completion-student-name" className="block text-[10px] font-bold uppercase">
+            Student Name
+          </label>
+          <input
+            id="completion-student-name"
+            value={completionOptions.studentName}
+            onChange={(e) => updateCompletionField('studentName', e.target.value)}
+            className="mt-1 w-full rounded border bg-white px-3 py-2 text-sm"
+            required
+          />
+        </div>
+
+        <div>
           <span className="block text-[10px] font-bold uppercase">Internship / Course / Project</span>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
             {COMPLETION_TYPES.map((type) => (
@@ -371,6 +447,112 @@ const CompletionCertificate: React.FC = () => {
             ))}
           </div>
         </div>
+
+        <div>
+          <label htmlFor="completion-course-title" className="block text-[10px] font-bold uppercase">
+            Course Title ( Internship / Course / Project )
+          </label>
+          <input
+            id="completion-course-title"
+            value={completionOptions.courseTitle}
+            onChange={(e) => updateCompletionField('courseTitle', e.target.value)}
+            className="mt-1 w-full rounded border bg-white px-3 py-2 text-sm"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="completion-from-date" className="block text-[10px] font-bold uppercase">
+              From
+            </label>
+            <input
+              id="completion-from-date"
+              type="date"
+              value={completionOptions.fromDate}
+              onChange={(e) => updateCompletionField('fromDate', e.target.value)}
+              className="mt-1 w-full rounded border bg-white px-2 py-2 text-sm"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="completion-to-date" className="block text-[10px] font-bold uppercase">
+              To
+            </label>
+            <input
+              id="completion-to-date"
+              type="date"
+              value={completionOptions.toDate}
+              onChange={(e) => updateCompletionField('toDate', e.target.value)}
+              className="mt-1 w-full rounded border bg-white px-2 py-2 text-sm"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="completion-date-of-issue" className="block text-[10px] font-bold uppercase">
+            Date Of Issue
+          </label>
+          <input
+            id="completion-date-of-issue"
+            type="date"
+            value={completionOptions.dateOfIssue}
+            onChange={(e) => updateCompletionField('dateOfIssue', e.target.value)}
+            className="mt-1 w-full rounded border bg-white px-3 py-2 text-sm"
+            required
+          />
+        </div>
+        {/* 
+        <div>
+          <label htmlFor="completion-signature-image" className="block text-[10px] font-bold uppercase">
+            Signature Image
+          </label>
+          <input
+            id="completion-signature-image"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+                toast.error('Please select a PNG, JPEG, or WEBP image for the signature.');
+                e.target.value = '';
+                return;
+              }
+              if (file.size > 2 * 1024 * 1024) {
+                toast.error('The signature image must be 2 MB or smaller.');
+                e.target.value = '';
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (typeof reader.result !== 'string') {
+                  toast.error('Unable to read the signature image.');
+                  return;
+                }
+                updateCompletionField('signatureImage', reader.result);
+              };
+              reader.onerror = () => toast.error('Unable to read the signature image.');
+              reader.readAsDataURL(file);
+            }}
+            className="mt-1 w-full text-xs"
+          />
+          {completionOptions.signatureImage && (
+            <div className="mt-2 flex items-center gap-2">
+              <img
+                src={completionOptions.signatureImage}
+                alt="Selected signature"
+                className="h-10 max-w-24 object-contain"
+              />
+              <span className="text-xs text-slate-600">
+                {completionOptions.signatureImage === DEFAULT_SIGNATURE_IMAGE
+                  ? 'signature.png selected'
+                  : 'Custom signature selected'}
+              </span>
+            </div>
+          )}
+        </div> */}
       </fieldset>
     </div>
   );
@@ -654,6 +836,17 @@ const CompletionCertificate: React.FC = () => {
                       style={{ top: '53%', left: '15%', width: '57%' }}
                     />
                     <div
+                      className="absolute z-10 text-center text-[22px] font-bold text-[#211d5b]"
+                      style={{
+                        top: '49.5%',
+                        left: '15%',
+                        width: '57%',
+                        fontFamily: "'WF Visual Sans', Arial, sans-serif",
+                      }}
+                    >
+                      {previewDetails.studentName}
+                    </div>
+                    <div
                       className="absolute z-10 text-center text-[16px] font-bold text-[#211d5b]"
                       style={{
                         top: '54.3%',
@@ -716,7 +909,9 @@ const CompletionCertificate: React.FC = () => {
                         minHeight: '22px',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
-                    />
+                    >
+                      {previewDetails.courseTitle}
+                    </div>
                     <div
                       className="absolute z-10 flex text-[16px] font-bold text-[#211d5b]"
                       style={{
@@ -728,11 +923,15 @@ const CompletionCertificate: React.FC = () => {
                     >
                       <div className="flex w-1/2 items-end gap-2">
                         <span>from</span>
-                        <span className="flex-1 border-b-2 border-[#211d5b] text-center" />
+                        <span className="flex-1 border-b-2 border-[#211d5b] text-center">
+                          {formatCompletionDate(previewDetails.fromDate)}
+                        </span>
                       </div>
                       <div className="ml-6 flex w-1/2 items-end gap-2">
                         <span>to</span>
-                        <span className="flex-1 border-b-2 border-[#211d5b] text-center" />
+                        <span className="flex-1 border-b-2 border-[#211d5b] text-center">
+                          {formatCompletionDate(previewDetails.toDate)}
+                        </span>
                       </div>
                     </div>
                     <div
@@ -842,8 +1041,23 @@ const CompletionCertificate: React.FC = () => {
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
                     >
-                      Date Of Issue
+                      Date Of Issue: {formatCompletionDate(previewDetails.dateOfIssue)}
                     </div>
+                    {previewDetails.signatureImage && (
+                      <img
+                        src={previewDetails.signatureImage}
+                        alt="Authorized signature"
+                        style={{
+                          position: 'absolute',
+                          top: '86.5%',
+                          left: '58%',
+                          width: '18%',
+                          height: '6%',
+                          objectFit: 'contain',
+                          zIndex: 2,
+                        }}
+                      />
+                    )}
                     <div
                       className="absolute z-10 text-center text-[16px] font-bold text-[#211d5b]"
                       style={{

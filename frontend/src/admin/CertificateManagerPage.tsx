@@ -12,6 +12,11 @@ type CompletionCertificate = {
   serialNumber: string;
   completionType: string;
   certificateTitle: string;
+  studentName: string;
+  courseTitle: string;
+  fromDate: string | null;
+  toDate: string | null;
+  dateOfIssue: string | null;
   createdAt: string;
 };
 
