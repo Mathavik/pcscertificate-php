@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CertificateManager from './CertificateManager';
+import CertificateManager, { SavedCompletionCertificate } from './CertificateManager';
 import { useCerts } from './CertificateContext';
 import { authHeaders } from '../auth';
 import { API_BASE } from '../config';
@@ -17,6 +17,7 @@ type CompletionCertificate = {
   fromDate: string | null;
   toDate: string | null;
   dateOfIssue: string | null;
+  signatureImage: string | null;
   createdAt: string;
 };
 
@@ -63,6 +64,10 @@ const CertificateManagerPage: React.FC = () => {
     navigate(PAGE_ROUTES[pageIndex] || PAGE_ROUTES[0]);
   };
 
+  const handleLoadCompletion = (certificate: SavedCompletionCertificate) => {
+    navigate(PAGE_ROUTES[3], { state: { completionCertificate: certificate } });
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-10">
       <div className="mx-auto max-w-[1400px]">
@@ -73,6 +78,7 @@ const CertificateManagerPage: React.FC = () => {
           saveStatus={saveStatus}
           onLoadSaved={handleLoadSaved}
           onLoadIntoEditor={handleLoad}
+          onLoadCompletionIntoEditor={handleLoadCompletion}
         />
       </div>
     </div>

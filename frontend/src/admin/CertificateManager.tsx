@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SavedCertificate } from './CertificateContext';
 import toast from 'react-hot-toast';
 
-type SavedCompletionCertificate = {
+export type SavedCompletionCertificate = {
   id: number;
   certificateID: number;
   serialNumber: string;
@@ -13,6 +13,7 @@ type SavedCompletionCertificate = {
   fromDate: string | null;
   toDate: string | null;
   dateOfIssue: string | null;
+  signatureImage: string | null;
   createdAt: string;
 };
 
@@ -23,6 +24,7 @@ type CertificateManagerProps = {
   saveStatus: string;
   onLoadSaved: () => void | Promise<void>;
   onLoadIntoEditor: (c: SavedCertificate) => void;
+  onLoadCompletionIntoEditor?: (c: SavedCompletionCertificate) => void;
 };
 
 type CertificateManagerEntry = {
@@ -50,6 +52,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   saveStatus,
   onLoadSaved,
   onLoadIntoEditor,
+  onLoadCompletionIntoEditor,
 }) => {
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>(''); 
@@ -65,8 +68,6 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
   const PAGE_SIZE = 10;
   const [certificatePage, setCertificatePage] = useState(1);
   const [completionPage, setCompletionPage] = useState(1);
-  const [selectedCompletion, setSelectedCompletion] = useState<SavedCompletionCertificate | null>(null);
-
   const managerEntries: CertificateManagerEntry[] = [
     ...adminCertificates
       .filter((certificate) => !isCompletionCertificate(certificate.certificateTitle))
@@ -502,10 +503,10 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
                           <td className="px-3 py-2">
                             <button
                               type="button"
-                              onClick={() => setSelectedCompletion(completion)}
-                              className="rounded bg-blue-700 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-800"
+                              onClick={() => onLoadCompletionIntoEditor?.(completion)}
+                              className="rounded bg-emerald-600 px-2 py-1 text-xs text-white transition-colors hover:bg-emerald-700"
                             >
-                              View
+                              Load
                             </button>
                           </td>
                         </tr>
@@ -591,46 +592,6 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
         </>
       )}
 
-      {selectedCompletion && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          role="presentation"
-          onClick={() => setSelectedCompletion(null)}
-        >
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="completion-details-title"
-            className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 id="completion-details-title" className="text-lg font-bold text-slate-900">
-                Certificate Completion Details
-              </h3>
-              <button
-                type="button"
-                onClick={() => setSelectedCompletion(null)}
-                aria-label="Close details"
-                className="rounded px-2 py-1 text-slate-500 hover:bg-slate-100"
-              >
-                ✕
-              </button>
-            </div>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              <dt className="font-semibold text-slate-600">ID</dt><dd>{selectedCompletion.id}</dd>
-              <dt className="font-semibold text-slate-600">Student</dt><dd>{selectedCompletion.studentName}</dd>
-              <dt className="font-semibold text-slate-600">Serial No</dt><dd>{selectedCompletion.serialNumber}</dd>
-              <dt className="font-semibold text-slate-600">Course Title</dt><dd>{selectedCompletion.courseTitle}</dd>
-              <dt className="font-semibold text-slate-600">Course Type</dt><dd>{selectedCompletion.completionType}</dd>
-              <dt className="font-semibold text-slate-600">From</dt><dd>{formatDateForDisplay(selectedCompletion.fromDate || '')}</dd>
-              <dt className="font-semibold text-slate-600">To</dt><dd>{formatDateForDisplay(selectedCompletion.toDate || '')}</dd>
-              <dt className="font-semibold text-slate-600">Date</dt>
-              <dd>{formatDateForDisplay(selectedCompletion.dateOfIssue || selectedCompletion.createdAt?.slice(0, 10) || '')}</dd>
-            </dl>
-          </section>
-        </div>
-      )}
     </div>
   );
 };

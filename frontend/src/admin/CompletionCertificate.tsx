@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { toJpeg, toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
@@ -102,6 +103,7 @@ const formatCompletionDate = (date: string) => {
 };
 
 const CompletionCertificate: React.FC = () => {
+  const location = useLocation();
   const {
     pagesData,
     pendingScrollRef,
@@ -110,6 +112,7 @@ const CompletionCertificate: React.FC = () => {
 
   const pageRef = useRef<HTMLElement | null>(null);
   const previewWrapRef = useRef<HTMLDivElement | null>(null);
+  const loadedCompletionLocationKey = useRef<string | null>(null);
   const [previewScale, setPreviewScale] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -124,6 +127,7 @@ const CompletionCertificate: React.FC = () => {
     () => completionOptions.certificateNumber
   );
   const [previewDetails, setPreviewDetails] = useState(() => completionOptions);
+  const [loadedCompletionId, setLoadedCompletionId] = useState<number | null>(null);
   const certificateNumberPrefix = getDefaultCertificateNumber();
   const certificateNumberSuffix = completionOptions.certificateNumber.replace(
     certificateNumberPrefix,
@@ -142,6 +146,52 @@ const CompletionCertificate: React.FC = () => {
     updateCompletionOptions(updatedOptions);
     setPreviewDetails(updatedOptions);
   };
+
+  useEffect(() => {
+    const loadedCertificate = (location.state as {
+      completionCertificate?: {
+        id: number;
+        serialNumber: string;
+        completionType: string;
+        studentName: string;
+        courseTitle: string;
+        fromDate: string | null;
+        toDate: string | null;
+        dateOfIssue: string | null;
+        signatureImage: string | null;
+      };
+    } | null)?.completionCertificate;
+
+    if (!loadedCertificate || !page || loadedCompletionLocationKey.current === location.key) return;
+    loadedCompletionLocationKey.current = location.key;
+
+    const loadedOptions: CompletionOptions = {
+      certificateNumber: loadedCertificate.serialNumber,
+      completionTypes: loadedCertificate.completionType
+        .split(',')
+        .map((type) => type.trim())
+        .filter((type) =>
+          COMPLETION_TYPES.includes(type as (typeof COMPLETION_TYPES)[number])
+        ),
+      studentName: loadedCertificate.studentName,
+      courseTitle: loadedCertificate.courseTitle,
+      fromDate: loadedCertificate.fromDate || '',
+      toDate: loadedCertificate.toDate || '',
+      dateOfIssue: loadedCertificate.dateOfIssue || '',
+      signatureImage: loadedCertificate.signatureImage || DEFAULT_SIGNATURE_IMAGE,
+    };
+
+    setLoadedCompletionId(loadedCertificate.id);
+    setEditMode(true);
+    setPreviewCompletionTypes(loadedOptions.completionTypes);
+    setPreviewCertificateNumber(loadedOptions.certificateNumber);
+    setPreviewDetails(loadedOptions);
+    handleChange(
+      index,
+      'certificateContent',
+      writeCompletionOptions(page.certificateContent, loadedOptions)
+    );
+  }, [handleChange, index, location.key, location.state, page]);
 
   const saveCompletionCertificate = async () => {
     if (completionOptions.completionTypes.length === 0) {
@@ -173,11 +223,15 @@ const CompletionCertificate: React.FC = () => {
 
     try {
       setIsSaving(true);
-      const response = await fetch(`${API_BASE}/completion_certificates.php`, {
-        method: 'POST',
+      const isUpdating = loadedCompletionId !== null;
+      const response = await fetch(
+        `${API_BASE}/completion_certificates.php${isUpdating ? `?id=${loadedCompletionId}` : ''}`,
+        {
+        method: isUpdating ? 'PUT' : 'POST',
         headers: authHeaders(),
         body: JSON.stringify(payload),
-      });
+        }
+      );
       const saved = await response.json();
       if (!response.ok) {
         throw new Error(saved.message || 'Unable to save completion certificate.');
@@ -186,8 +240,14 @@ const CompletionCertificate: React.FC = () => {
       setPreviewCompletionTypes(completionOptions.completionTypes);
       setPreviewCertificateNumber(payload.serialNumber);
       setPreviewDetails(completionOptions);
-      updateCompletionOptions(getDefaultCompletionOptions());
-      toast.success('Completion Certificate Saved!');
+      if (isUpdating) {
+        setLoadedCompletionId(null);
+        updateCompletionOptions(getDefaultCompletionOptions());
+        toast.success('Completion Certificate Updated!');
+      } else {
+        updateCompletionOptions(getDefaultCompletionOptions());
+        toast.success('Completion Certificate Saved!');
+      }
       return true;
     } catch (error) {
       console.error('Unable to save Certificate Completion:', error);
