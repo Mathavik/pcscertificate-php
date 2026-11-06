@@ -102,6 +102,147 @@ const formatCompletionDate = (date: string) => {
   return year && month && day ? `${day}.${month}.${year}` : date;
 };
 
+const formatCompletionDateForInput = (date: string) => {
+  if (!date) return '';
+  const [year, month, day] = date.split('-');
+  return year && month && day ? `${day}.${month}.${year}` : '';
+};
+
+const completionInputToIsoDate = (text: string) => {
+  const match = text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (!match) return null;
+
+  const [, day, month, year] = match;
+  const date = new Date(`${year}-${month}-${day}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  if (
+    date.getFullYear() !== Number(year) ||
+    date.getMonth() + 1 !== Number(month) ||
+    date.getDate() !== Number(day)
+  ) {
+    return null;
+  }
+  return `${year}-${month}-${day}`;
+};
+
+// Keeps the date typed as dd.mm.yyyy and hard-limits the year to 4 digits.
+const maskCompletionDateInput = (raw: string) => {
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 8);
+
+  if (digits.length <= 2) return day;
+  if (digits.length <= 4) return `${day}.${month}`;
+  return `${day}.${month}.${year}`;
+};
+
+type CompletionDateFieldProps = {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+};
+
+const CompletionDateField: React.FC<CompletionDateFieldProps> = ({
+  id,
+  value,
+  onChange,
+  className = '',
+}) => {
+  const pickerRef = useRef<HTMLInputElement | null>(null);
+  const [text, setText] = useState(() => formatCompletionDateForInput(value));
+
+  useEffect(() => {
+    setText(formatCompletionDateForInput(value));
+  }, [value]);
+
+  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = maskCompletionDateInput(event.target.value);
+    setText(masked);
+
+    if (masked.length === 0) {
+      onChange('');
+      return;
+    }
+    if (masked.length === 10) {
+      const isoDate = completionInputToIsoDate(masked);
+      if (isoDate) onChange(isoDate);
+    }
+  };
+
+  const handleBlur = () => {
+    const isoDate = text.length === 10 ? completionInputToIsoDate(text) : null;
+    if (!isoDate) {
+      if (text.length > 0) {
+        toast.error('Enter a valid date as dd.mm.yyyy (year must be 4 digits).');
+      }
+      setText(formatCompletionDateForInput(value));
+    }
+  };
+
+  const openPicker = () => {
+    const picker = pickerRef.current as
+      | (HTMLInputElement & { showPicker?: () => void })
+      | null;
+    try {
+      picker?.showPicker?.();
+    } catch {
+      picker?.focus();
+    }
+  };
+
+  return (
+    <div className={`relative ${className}`}>
+      <input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
+        placeholder="dd.mm.yyyy"
+        maxLength={10}
+        value={text}
+        onChange={handleTextChange}
+        onBlur={handleBlur}
+        className="w-full rounded border bg-white px-3 py-2 pr-9 text-sm"
+        required
+      />
+      <button
+        type="button"
+        onClick={openPicker}
+        title="Choose a date"
+        aria-label="Choose a date"
+        className="absolute inset-y-0 right-1 my-auto flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100"
+      >
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path
+            d="M7 2v3M17 2v3M3.5 9h17M5 5h14a1.5 1.5 0 0 1 1.5 1.5v13A1.5 1.5 0 0 1 19 21H5a1.5 1.5 0 0 1-1.5-1.5v-13A1.5 1.5 0 0 1 5 5Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <input
+        ref={pickerRef}
+        type="date"
+        min="1900-01-01"
+        max="9999-12-31"
+        value={value}
+        onChange={(event) => {
+          onChange(event.target.value);
+          setText(formatCompletionDateForInput(event.target.value));
+        }}
+        className="pointer-events-none absolute bottom-0 right-0 h-7 w-7 opacity-0"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+    </div>
+  );
+};
+
 const CompletionCertificate: React.FC = () => {
   const location = useLocation();
   const {
@@ -206,6 +347,14 @@ const CompletionCertificate: React.FC = () => {
       !completionOptions.dateOfIssue
     ) {
       toast.error('Please complete the student, course, and date fields before saving.');
+      return false;
+    }
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(completionOptions.fromDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(completionOptions.toDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(completionOptions.dateOfIssue)
+    ) {
+      toast.error('Please enter dates with a 4-digit year (e.g. 03.12.2026).');
       return false;
     }
 
@@ -526,26 +675,22 @@ const CompletionCertificate: React.FC = () => {
             <label htmlFor="completion-from-date" className="block text-[10px] font-bold uppercase">
               From
             </label>
-            <input
+            <CompletionDateField
               id="completion-from-date"
-              type="date"
               value={completionOptions.fromDate}
-              onChange={(e) => updateCompletionField('fromDate', e.target.value)}
-              className="mt-1 w-full rounded border bg-white px-2 py-2 text-sm"
-              required
+              onChange={(value) => updateCompletionField('fromDate', value)}
+              className="mt-1"
             />
           </div>
           <div>
             <label htmlFor="completion-to-date" className="block text-[10px] font-bold uppercase">
               To
             </label>
-            <input
+            <CompletionDateField
               id="completion-to-date"
-              type="date"
               value={completionOptions.toDate}
-              onChange={(e) => updateCompletionField('toDate', e.target.value)}
-              className="mt-1 w-full rounded border bg-white px-2 py-2 text-sm"
-              required
+              onChange={(value) => updateCompletionField('toDate', value)}
+              className="mt-1"
             />
           </div>
         </div>
@@ -554,13 +699,11 @@ const CompletionCertificate: React.FC = () => {
           <label htmlFor="completion-date-of-issue" className="block text-[10px] font-bold uppercase">
             Date Of Issue
           </label>
-          <input
+          <CompletionDateField
             id="completion-date-of-issue"
-            type="date"
             value={completionOptions.dateOfIssue}
-            onChange={(e) => updateCompletionField('dateOfIssue', e.target.value)}
-            className="mt-1 w-full rounded border bg-white px-3 py-2 text-sm"
-            required
+            onChange={(value) => updateCompletionField('dateOfIssue', value)}
+            className="mt-1"
           />
         </div>
         {/* 
@@ -896,9 +1039,9 @@ const CompletionCertificate: React.FC = () => {
                       style={{ top: '53%', left: '15%', width: '57%' }}
                     />
                     <div
-                      className="absolute z-10 text-center text-[22px] font-bold text-[#211d5b]"
+                      className="absolute z-10 text-center text-[24px] font-bold text-[#211d5b]"
                       style={{
-                        top: '49.5%',
+                        top: '48.5%',
                         left: '15%',
                         width: '57%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
@@ -961,9 +1104,9 @@ const CompletionCertificate: React.FC = () => {
                       on
                     </div>
                     <div
-                      className="absolute z-10 border-b-2 border-[#211d5b] text-center text-[15px] font-bold text-[#211d5b]"
+                      className="absolute z-10 border-b-2 border-[#211d5b] text-center text-[22px] font-bold text-[#211d5b]"
                       style={{
-                        top: '65.6%',
+                        top: '64.4%',
                         left: '19%',
                         width: '53%',
                         minHeight: '22px',
@@ -1094,14 +1237,20 @@ const CompletionCertificate: React.FC = () => {
                       <span>/ pcstechsurandai</span>
                     </div>
                     <div
-                      className="absolute z-10 text-[16px] font-bold text-[#211d5b]"
+                      className="absolute z-10 text-center font-bold text-[#211d5b]"
                       style={{
-                        top: '93%',
+                        top: '89%',
                         left: '15%',
+                        
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
                     >
-                      Date Of Issue: {formatCompletionDate(previewDetails.dateOfIssue)}
+                      <div className="text-[17px]">
+                        {formatCompletionDate(previewDetails.dateOfIssue)}
+                      </div>
+                      <div className="text-[16px]" style={{ marginTop: '2px' }}>
+                        Date Of Issue
+                      </div>
                     </div>
                     {previewDetails.signatureImage && (
                       <img
