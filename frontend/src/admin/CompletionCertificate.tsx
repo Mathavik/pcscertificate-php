@@ -918,7 +918,7 @@ const CompletionCertificate: React.FC = () => {
                       for successfully completing the
                     </div>
                     <div
-                      className="absolute left-[45%] top-[60%] z-10 flex -translate-x-1/2 justify-center gap-5 whitespace-nowrap text-[22px] font-bold uppercase text-[#211d5b]"
+                      className="absolute left-[45%] top-[59%] z-10 flex -translate-x-1/2 justify-center gap-5 whitespace-nowrap text-[22px] font-bold uppercase text-[#211d5b]"
                       style={{ fontFamily: "'WF Visual Sans', sans-serif" }}
                     >
                       {COMPLETION_TYPES.map((type) => {
@@ -953,7 +953,7 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 text-[16px] font-bold text-[#211d5b]"
                       style={{
-                        top: '67%',
+                        top: '66%',
                         left: '15%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
                       }}
@@ -963,7 +963,7 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 border-b-2 border-[#211d5b] text-center text-[15px] font-bold text-[#211d5b]"
                       style={{
-                        top: '66.6%',
+                        top: '65.6%',
                         left: '19%',
                         width: '53%',
                         minHeight: '22px',
@@ -975,7 +975,7 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 flex text-[16px] font-bold text-[#211d5b]"
                       style={{
-                        top: '71.2%',
+                        top: '70.2%',
                         left: '20%',
                         width: '50%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
@@ -997,7 +997,7 @@ const CompletionCertificate: React.FC = () => {
                     <div
                       className="absolute z-10 text-center text-[16px] font-semibold leading-[1.45] text-[#211d5b]"
                       style={{
-                        top: '76.5%',
+                        top: '75.5%',
                         left: '14%',
                         width: '60%',
                         fontFamily: "'WF Visual Sans', Arial, sans-serif",
@@ -1109,10 +1109,10 @@ const CompletionCertificate: React.FC = () => {
                         alt="Authorized signature"
                         style={{
                           position: 'absolute',
-                          top: '86.5%',
+                          top: '85.5%',
                           left: '58%',
                           width: '18%',
-                          height: '6%',
+                          height: '8%',
                           objectFit: 'contain',
                           zIndex: 2,
                         }}
